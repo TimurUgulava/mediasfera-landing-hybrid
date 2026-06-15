@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Медиасфера — контент, который продаёт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* свежая правка Тимура: фон светлый и тёплый, НЕ красный, НЕ тёмный */
+    --bg:#fcfaf6;            /* мягкий тёплый off-white фон за листом */
+    --bg-2:#f7f3ec;          /* чуть глубже для секций */
+    --sheet:#ffffff;         /* белый лист-документ */
+    --ink:#1b1b1b;
+    --ink-2:#3a3a3a;
+    --grey:#6f6b64;
+    --red:#E30613;           /* фирменный — только акцент */
+    --red-dark:#bd0005;
+    --marker:#ffe98a;        /* жёлтый маркер */
+    --green:#2e8b43;
+    --line:rgba(27,27,27,.10);
+    --serif:'Lora',Georgia,'Times New Roman',serif;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --hand:'Caveat',cursive;
+    --sheet-max:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:var(--sans);
+    color:var(--ink);
+    line-height:1.55;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+    /* лёгкий, воздушный фон: тёплый off-white + едва заметное «бумажное» зерно */
+    background:
+      radial-gradient(1200px 600px at 50% -120px, #ffffff 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(180deg,#fdfbf8 0%, var(--bg) 40%, var(--bg) 100%);
+    background-attachment:fixed;
+  }
+  /* почти невидимое зерно бумаги поверх фона */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+
+  /* ====================== HEADER ====================== */
+  header.topbar{
+    position:sticky;top:0;z-index:60;
+    background:rgba(252,250,246,.82);
+    backdrop-filter:saturate(180%) blur(12px);
+    -webkit-backdrop-filter:saturate(180%) blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1160px;margin:0 auto;
+    padding:13px 30px;
+    display:flex;align-items:center;justify-content:space-between;gap:22px;
+  }
+  .logo{
+    font-family:var(--sans);font-weight:700;font-size:21px;letter-spacing:-.02em;
+    color:var(--ink);text-decoration:none;user-select:none;
+  }
+  .logo .sfera{color:var(--red)}
+  nav.mainnav{display:flex;align-items:center;gap:26px}
+  nav.mainnav a{
+    font-size:14.5px;font-weight:500;color:var(--ink);text-decoration:none;
+    letter-spacing:.01em;opacity:.8;transition:opacity .18s ease;
+  }
+  nav.mainnav a:hover{opacity:1}
+  .btn-head{
+    font-family:var(--sans);font-size:14.5px;font-weight:600;
+    background:var(--red);color:#fff;border:none;cursor:pointer;
+    padding:10px 20px;border-radius:9px;text-decoration:none;
+    transition:background .18s ease, transform .18s ease;white-space:nowrap;
+  }
+  .btn-head:hover{background:var(--red-dark);transform:translateY(-1px)}
+  .burger{
+    display:none;background:none;border:none;cursor:pointer;
+    width:42px;height:42px;flex-direction:column;justify-content:center;gap:5px;padding:9px;
+  }
+  .burger span{display:block;height:2px;width:22px;background:var(--ink);border-radius:2px;transition:transform .22s ease,opacity .22s ease}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.open span:nth-child(2){opacity:0}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+  .mobile-menu{display:none;border-top:1px solid var(--line);background:rgba(252,250,246,.98);padding:8px 18px 16px}
+  .mobile-menu.open{display:block;animation:fadeIn .2s ease}
+  .mobile-menu a{display:block;padding:12px 4px;font-size:16px;font-weight:500;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+  .mobile-menu a:last-child{border-bottom:none}
+  .mobile-menu .btn-head{display:inline-block;margin-top:12px}
+
+  /* ====================== LAYOUT / SHEET ====================== */
+  .stage{position:relative;z-index:1;padding:50px 24px 30px;display:flex;justify-content:center}
+  .section{position:relative;z-index:1;padding:30px 24px;display:flex;justify-content:center}
+  .layout{position:relative;width:100%;max-width:var(--sheet-max)}
+
+  .sheet{
+    background:var(--sheet);
+    border-radius:8px;
+    box-shadow:
+      0 1px 1px rgba(27,27,27,.04),
+      0 30px 70px -34px rgba(27,27,27,.20),
+      0 10px 26px -16px rgba(27,27,27,.12);
+    padding:58px 66px 52px;
+    position:relative;
+    /* лёгкий «бумажный» край */
+    border:1px solid rgba(27,27,27,.05);
+  }
+  .sheet.compact{padding:48px 60px 46px}
+  /* лёгкий parallax-наклон листа — задаётся через JS-переменную */
+  .sheet.tiltable{transition:transform .25s ease-out}
+
+  /* скрепка-уголок на листе (декор) */
+  .sheet .corner-fold{
+    position:absolute;top:0;right:0;width:46px;height:46px;
+    background:linear-gradient(225deg, var(--bg-2) 0 50%, transparent 50%);
+    border-top-right-radius:8px;
+    box-shadow:-2px 2px 4px rgba(27,27,27,.06);
+    pointer-events:none;
+  }
+
+  .kicker{
+    font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--red);
+    display:inline-flex;align-items:center;gap:9px;margin-bottom:22px;
+  }
+  .kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;animation:pulseDot 2.4s ease-in-out infinite}
+  .kicker.static::before{animation:none}
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(227,6,19,.45)}50%{box-shadow:0 0 0 5px rgba(227,6,19,0)}}
+
+  h1.headline{font-family:var(--serif);font-weight:600;font-size:42px;line-height:1.14;letter-spacing:-.014em;color:var(--ink);margin-bottom:14px}
+  h1.headline .mark{font-size:inherit}
+  h2.sec-title{font-family:var(--serif);font-weight:600;font-size:31px;line-height:1.2;letter-spacing:-.012em;color:var(--ink);margin-bottom:14px}
+  h3.sub-title{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.3;color:var(--ink);margin-bottom:12px}
+
+  .subhead{font-family:var(--sans);font-size:16.5px;line-height:1.6;color:var(--ink-2);margin-bottom:26px;max-width:56ch}
+  .subhead b{color:var(--ink);font-weight:600}
+
+  /* маркер: закрашивается на скролле, фолбэк — виден сразу как залитый */
+  .mark{
+    background-image:linear-gradient(transparent 58%, var(--marker) 58%);
+    background-size:100% 100%;background-repeat:no-repeat;
+    padding:0 3px;font-weight:600;color:var(--ink);
+    box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  }
+  .js .mark{background-size:0% 100%}
+  .js .mark.lit{animation:markFill .55s ease forwards}
+  @keyframes markFill{from{background-size:0% 100%}to{background-size:100% 100%}}
+  .red{color:var(--red)}
+
+  /* рукописная подпись-byline */
+  .byline{
+    font-family:var(--serif);font-style:italic;font-size:14.5px;line-height:1.6;color:var(--grey);
+    border-left:2px solid var(--line);padding:2px 0 2px 16px;margin-bottom:22px;
+  }
+  .byline .pen{font-family:var(--hand);font-style:normal;color:var(--red);font-size:19px;margin-right:6px}
+
+  /* CTA */
+  .cta-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:22px}
+  .cta-row.nomb{margin-bottom:0}
+  .btn-primary{
+    font-family:var(--sans);font-size:16px;font-weight:600;
+    background:var(--red);color:#fff;border:none;cursor:pointer;
+    padding:15px 30px;border-radius:10px;text-decoration:none;
+    transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
+    box-shadow:0 8px 18px -8px rgba(227,6,19,.5);white-space:nowrap;
+  }
+  .btn-primary:hover{transform:translateY(-1px);background:var(--red-dark);box-shadow:0 12px 24px -8px rgba(189,0,5,.55)}
+  .link-secondary{
+    font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);
+    text-decoration:none;cursor:pointer;background:none;border:none;padding:0;
+    line-height:1.4;max-width:32ch;text-align:left;
+  }
+  .link-secondary span{border-bottom:2px solid var(--red);padding-bottom:2px;transition:padding-bottom .18s ease, color .18s ease}
+  .link-secondary:hover span{padding-bottom:5px;color:var(--red-dark)}
+
+  /* chips */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px}
+  .chip{
+    font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-2);
+    background:var(--bg);border:1px solid var(--line);
+    padding:7px 14px;border-radius:100px;text-decoration:none;
+    display:inline-flex;align-items:center;gap:7px;
+    transition:border-color .16s ease, color .16s ease, transform .16s ease;
+  }
+  a.chip:hover{border-color:var(--red);color:var(--red);transform:translateY(-1px)}
+  .chip::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--red);display:inline-block}
+
+  /* trust line */
+  .trust{
+    font-family:var(--sans);font-size:13px;color:var(--grey);
+    border-top:1px solid var(--line);padding-top:16px;
+    display:flex;flex-wrap:wrap;gap:6px 14px;
+  }
+  .trust span{display:inline-flex;align-items:center;white-space:nowrap}
+  .trust span+span::before{content:"·";margin-right:14px;color:rgba(27,27,27,.3)}
+  .trust b{color:var(--ink);font-weight:600}
+
+  /* ====================== HANDWRITTEN MARGIN NOTES ====================== */
+  .note{
+    position:absolute;font-family:var(--hand);color:var(--red);
+    font-size:28px;line-height:1.12;font-weight:600;width:192px;z-index:8;
+    opacity:1;transition:opacity .55s ease, transform .55s ease;
+  }
+  .js .note{opacity:0;transform:translateY(8px)}
+  .js .note.in{opacity:1;transform:none}
+  .note small{display:block;font-size:18.5px;font-weight:500;opacity:.92;margin-top:2px}
+  .note.right{right:-198px;text-align:left}
+  .note.left{left:-196px;text-align:right}
+  .note.arrow-r::before{content:"";position:absolute;left:-26px;top:9px;width:22px;height:2px;background:var(--red);opacity:.55}
+  .note.arrow-l::after{content:"";position:absolute;right:-26px;top:9px;width:22px;height:2px;background:var(--red);opacity:.55}
+
+  /* inline-версии пометок для узких экранов (фолбэк, когда поля скрыты) */
+  .inline-note{
+    display:none;font-family:var(--hand);color:var(--red);font-size:19px;font-weight:600;
+    line-height:1.15;margin:-6px 0 18px;
+  }
+  .inline-note small{display:block;font-size:15px;font-weight:500;opacity:.9}
+
+  /* ====================== STICKERS (cats) ====================== */
+  .sticker{
+    position:absolute;z-index:12;width:120px;
+    filter:drop-shadow(0 10px 16px rgba(27,27,27,.22));
+    transition:transform .3s cubic-bezier(.2,.8,.3,1);
+    user-select:none;pointer-events:auto;
+  }
+  .sticker img{display:block;width:100%;height:auto;border-radius:14px}
+  .sticker:hover{transform:rotate(0deg) scale(1.05) !important}
+  .sticker .bubble{
+    position:absolute;
+    font-family:var(--hand);font-weight:600;font-size:17px;line-height:1.1;color:var(--ink);
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:7px 11px;width:max-content;max-width:160px;
+    box-shadow:0 8px 18px -10px rgba(27,27,27,.3);
+    opacity:0;transform:translateY(4px) scale(.96);transition:opacity .25s ease, transform .25s ease;
+    pointer-events:none;
+  }
+  .sticker:hover .bubble{opacity:1;transform:translateY(0) scale(1)}
+  .sticker .bubble.tl{right:78%;bottom:78%}
+  .sticker .bubble.tr{left:78%;bottom:78%}
+  .sticker .bubble.bl{right:78%;top:78%}
+  .sticker .bubble b{color:var(--red)}
+  /* лёгкое «дыхание» стикеров, чтобы выглядели живыми */
+  .sticker.float{animation:floaty 6s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0) rotate(var(--rot,0deg))}50%{transform:translateY(-7px) rotate(var(--rot,0deg))}}
+
+  /* ====================== DIFF CARD (было → стало) ====================== */
+  .diffcard{
+    position:relative;margin:6px 0 24px;
+    background:var(--bg);border:1px solid var(--line);border-radius:14px;
+    padding:20px 22px;transform:rotate(-.5deg);
+    box-shadow:0 18px 34px -28px rgba(27,27,27,.4);
+  }
+  .diffcard::before{
+    content:"черновик · правки редактора";position:absolute;top:-12px;left:18px;
+    font-family:var(--sans);text-transform:uppercase;font-size:10.5px;font-weight:700;letter-spacing:.08em;
+    background:var(--ink);color:#fff;padding:4px 10px;border-radius:6px;
+  }
+  .diffcard h4{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--grey);margin:6px 0 14px}
+  .diff{margin:0 0 13px;font-size:16px}
+  .diff:last-child{margin-bottom:0}
+  .diff .was{color:var(--grey);text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px;display:block;font-family:var(--serif)}
+  .diff .now{color:var(--ink);font-weight:700;display:block;margin-top:4px;font-family:var(--serif)}
+  .diff .now::before{content:"→ ";color:var(--green);font-weight:800}
+
+  /* ====================== FLOW (как доводим до продаж) ====================== */
+  .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:8px 0 22px;counter-reset:step}
+  .flow-step{
+    position:relative;background:var(--bg);border:1px solid var(--line);border-radius:13px;
+    padding:18px 16px 16px;overflow:hidden;
+    opacity:1;transform:none;transition:opacity .5s ease, transform .5s ease;
+  }
+  .js .flow-step{opacity:0;transform:translateY(12px)}
+  .js .flow.in .flow-step{opacity:1;transform:none}
+  .js .flow.in .flow-step:nth-child(1){transition-delay:.04s}
+  .js .flow.in .flow-step:nth-child(2){transition-delay:.12s}
+  .js .flow.in .flow-step:nth-child(3){transition-delay:.20s}
+  .js .flow.in .flow-step:nth-child(4){transition-delay:.28s}
+  .js .flow.in .flow-step:nth-child(5){transition-delay:.36s}
+  .js .flow.in .flow-step:nth-child(6){transition-delay:.44s}
+  .flow-step::before{counter-increment:step;content:counter(step);position:absolute;top:-10px;right:6px;font-family:var(--serif);font-weight:700;font-size:62px;color:rgba(27,27,27,.05);line-height:1}
+  .flow-step .ic{width:32px;height:32px;border-radius:9px;background:#fdeceb;color:var(--red);display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:15px;margin-bottom:11px}
+  .flow-step h4{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:5px;letter-spacing:-.01em}
+  .flow-step p{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--grey)}
+  .flow-step.flag{background:var(--ink);border-color:var(--ink)}
+  .flow-step.flag::before{color:rgba(255,255,255,.08)}
+  .flow-step.flag h4{color:#fff}
+  .flow-step.flag p{color:#d6d6d6}
+  .flow-step.flag .ic{background:rgba(255,255,255,.12);color:#fff}
+  .flow-step .branch{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+  .flow-step .branch span{font-family:var(--sans);font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.16);padding:3px 9px;border-radius:100px}
+
+  /* ====================== CASES (вырезки) ====================== */
+  .cases{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:8px 0 22px}
+  .case{
+    position:relative;background:var(--bg);border:1px solid var(--line);border-radius:14px;
+    padding:22px 20px 20px;
+    box-shadow:0 20px 36px -30px rgba(27,27,27,.45);
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .case:nth-child(odd){transform:rotate(-.5deg)}
+  .case:nth-child(even){transform:rotate(.6deg)}
+  .case:hover{transform:translateY(-3px) rotate(0);box-shadow:0 22px 40px -24px rgba(27,27,27,.4);border-color:rgba(227,6,19,.4)}
+  .case .chan{display:inline-flex;font-family:var(--sans);font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--grey);background:#fff;border:1px solid var(--line);padding:4px 9px;border-radius:7px;margin-bottom:12px}
+  .case .cname{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);margin-bottom:6px}
+  .case .big{font-family:var(--serif);font-weight:700;font-size:25px;line-height:1.1;color:var(--ink);margin-bottom:8px;letter-spacing:-.01em}
+  .case .sub{font-family:var(--sans);font-size:13px;line-height:1.5;color:var(--ink-2)}
+  .case .clink{display:inline-block;margin-top:12px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--red);text-decoration:none;border-bottom:1px solid rgba(227,6,19,.4);padding-bottom:1px}
+  .case .clink:hover{color:var(--red-dark)}
+  /* «скотч» поверх вырезки */
+  .case .tape{position:absolute;top:-9px;left:50%;transform:translateX(-50%) rotate(-2deg);width:64px;height:18px;background:rgba(255,233,138,.6);border:1px solid rgba(231,212,132,.6);border-radius:2px}
+
+  .logos{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;margin:6px 0 8px}
+  .logos span{font-family:var(--serif);font-weight:600;font-size:16px;color:#5b574f;letter-spacing:.02em;opacity:.85}
+  .softline{font-family:var(--serif);font-style:italic;font-size:14.5px;line-height:1.6;color:var(--grey);margin:10px 0 6px}
+
+  /* ====================== TEAM + YANDEX ====================== */
+  .two{display:grid;grid-template-columns:1.1fr .9fr;gap:26px;margin:8px 0 0;align-items:start}
+  .people{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .person{display:flex;gap:12px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .person .av{flex-shrink:0;width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;font-family:var(--serif);font-weight:600;font-size:16px;display:grid;place-items:center}
+  .person b{display:block;font-family:var(--sans);font-size:14.5px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  .person span{display:block;font-family:var(--sans);font-size:12px;line-height:1.42;color:var(--grey);margin-top:3px}
+  .flow-arrow{font-family:var(--hand);color:var(--red);font-size:21px;font-weight:700;margin:10px 0 4px;display:block}
+  .trophies{background:var(--ink);color:#fff;border-radius:16px;padding:22px}
+  .trophies h3{font-family:var(--serif);font-weight:600;color:#fff;font-size:20px;margin-bottom:4px;line-height:1.15}
+  .trophies .tsub{color:#bdbdbd;font-size:13px;margin-bottom:15px}
+  .trophies ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .trophies li{display:flex;gap:12px;font-family:var(--sans);font-size:13.5px;line-height:1.45;color:#e2e2e2}
+  .trophies li .tk{flex-shrink:0;width:28px;height:28px;border-radius:8px;background:var(--marker);color:var(--ink);display:grid;place-items:center;font-size:14px}
+  .trophies li b{color:#fff}
+
+  /* ====================== FAQ ====================== */
+  .faq{margin:8px 0 0}
+  .faq-item{border-top:1px solid var(--line)}
+  .faq-item:last-child{border-bottom:1px solid var(--line)}
+  .faq-q{
+    width:100%;text-align:left;background:none;border:none;cursor:pointer;
+    font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);
+    padding:19px 44px 19px 0;position:relative;line-height:1.35;display:flex;gap:12px;
+  }
+  .faq-q .qn{font-family:var(--serif);color:var(--red);flex-shrink:0}
+  .faq-q::after{content:"+";position:absolute;right:4px;top:50%;transform:translateY(-50%);font-family:var(--sans);font-size:26px;font-weight:400;color:var(--red);transition:transform .25s ease;line-height:1}
+  .faq-item.open .faq-q::after{transform:translateY(-50%) rotate(45deg)}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .32s ease}
+  .faq-a-inner{font-family:var(--serif);font-size:16.5px;line-height:1.64;color:var(--ink-2);padding:0 44px 20px 0}
+  @media (prefers-reduced-motion:reduce){.faq-a{transition:none}}
+
+  /* ====================== FORM ====================== */
+  .form-card{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;margin-top:8px;align-items:start}
+  .lead-form{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 26px 46px -38px rgba(27,27,27,.45);position:relative}
+  .formnote{font-family:var(--hand);font-weight:600;color:var(--red);font-size:21px;transform:rotate(-1.5deg);display:inline-block;margin-bottom:10px}
+  .field{margin-bottom:15px}
+  .field label{display:block;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:7px;letter-spacing:.01em}
+  .field input,.field textarea{width:100%;font-family:var(--serif);font-size:16px;line-height:1.5;color:var(--ink);border:1px solid rgba(27,27,27,.16);border-radius:10px;padding:13px 14px;outline:none;background:#fff;transition:border-color .18s ease}
+  .field input:focus,.field textarea:focus{border-color:var(--red)}
+  .field textarea{min-height:80px;resize:vertical}
+  .field .opt{color:var(--grey);font-weight:500}
+  .seg{display:flex;gap:6px;background:#ece6db;border-radius:10px;padding:4px;margin-bottom:8px}
+  .seg button{flex:1;border:none;background:none;cursor:pointer;padding:9px;border-radius:7px;font-family:var(--sans);font-weight:600;font-size:13.5px;color:var(--grey);transition:.18s}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 4px 10px -6px rgba(27,27,27,.25)}
+  .microcopy{font-family:var(--sans);font-size:12.5px;color:var(--grey);margin-top:12px;line-height:1.5}
+  .form-sent{display:none;margin-top:14px;padding:14px 16px;border-radius:10px;background:rgba(255,233,138,.4);border:1px solid rgba(227,6,19,.25);font-family:var(--serif);font-size:15.5px;color:var(--ink);line-height:1.5}
+  .form-sent.show{display:block;animation:fadeIn .3s ease}
+  .alt{background:var(--ink);color:#fff;border-radius:16px;padding:24px;position:relative}
+  .alt h3{font-family:var(--serif);font-weight:600;color:#fff;font-size:20px;margin-bottom:8px}
+  .alt p{font-family:var(--sans);color:#cfcfcf;font-size:14px;line-height:1.55;margin-bottom:14px}
+  .alt a{color:var(--marker);font-weight:600;text-decoration:none;font-family:var(--sans);font-size:14px}
+  .alt a:hover{text-decoration:underline}
+  .alt .div{height:1px;background:rgba(255,255,255,.14);margin:18px 0}
+  .alt h4{font-family:var(--sans);font-size:14px;font-weight:700;color:#fff;margin-bottom:6px}
+
+  /* ====================== FOOTER ====================== */
+  footer.site-footer{position:relative;z-index:1;background:var(--ink);color:#cfcfcf;padding:40px 24px 36px;margin-top:24px}
+  .footer-inner{max-width:var(--sheet-max);margin:0 auto}
+  .footer-top{display:flex;justify-content:space-between;align-items:flex-start;gap:22px;flex-wrap:wrap;margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .footer-top .logo{color:#fff}
+  .footer-links{display:flex;gap:20px;flex-wrap:wrap}
+  .footer-links a{font-family:var(--sans);font-size:14px;color:#cfcfcf;text-decoration:none;transition:color .16s ease}
+  .footer-links a:hover{color:#fff}
+  .footer-meta{font-family:var(--sans);font-size:13px;line-height:1.7;color:#9a9a9a}
+  .footer-meta .soft{color:#bdbdbd;font-style:italic;margin-top:8px;display:block}
+
+  /* ====================== LEAD-MAGNET MODAL ====================== */
+  .lm-backdrop{position:fixed;inset:0;z-index:100;background:rgba(27,27,27,.42);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:24px}
+  .lm-backdrop.open{display:flex;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .lm-panel{background:#fff;border-radius:16px;box-shadow:0 30px 70px -20px rgba(27,27,27,.45);width:100%;max-width:560px;padding:32px 32px 28px;animation:popUp .26s cubic-bezier(.2,.8,.3,1);max-height:90vh;overflow:auto;position:relative}
+  @keyframes popUp{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+  .lm-panel h3{font-family:var(--serif);font-size:23px;font-weight:600;margin-bottom:6px}
+  .lm-panel .lm-sub{font-family:var(--sans);font-size:14px;color:var(--grey);margin-bottom:16px}
+  .lm-panel textarea{width:100%;min-height:120px;resize:vertical;font-family:var(--serif);font-size:15.5px;line-height:1.6;color:var(--ink);border:1px solid rgba(27,27,27,.16);border-radius:10px;padding:14px 16px;outline:none;transition:border-color .18s ease}
+  .lm-panel textarea:focus{border-color:var(--red)}
+  .lm-actions{display:flex;gap:12px;align-items:center;margin-top:14px}
+  .lm-actions .btn-primary{padding:12px 24px;font-size:15px}
+  .lm-close{margin-left:auto;background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;color:var(--grey)}
+  .lm-close:hover{color:var(--ink)}
+  .verdict{margin-top:18px;display:none;border-top:1px dashed rgba(27,27,27,.18);padding-top:16px}
+  .verdict.show{display:block;animation:fadeIn .3s ease}
+  .verdict .score{font-family:var(--serif);font-size:17px;font-weight:600;margin-bottom:3px}
+  .verdict .score b{color:var(--red)}
+  .verdict .vlabel{font-family:var(--sans);font-size:13px;color:var(--grey);margin-bottom:13px}
+  .verdict ol{margin:0;padding-left:0;list-style:none;counter-reset:fix}
+  .verdict li{font-family:var(--sans);font-size:14px;line-height:1.5;color:var(--ink-2);padding:9px 0 9px 36px;position:relative;border-top:1px solid rgba(27,27,27,.07)}
+  .verdict li:first-child{border-top:none}
+  .verdict li::before{counter-increment:fix;content:counter(fix);position:absolute;left:0;top:8px;width:24px;height:24px;border-radius:50%;background:var(--marker);color:var(--ink);font-family:var(--sans);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .verdict li .now{color:var(--ink);font-weight:600}
+  .verdict li .now::before{content:"→ ";color:var(--green);font-weight:800}
+  .verdict li .was{color:var(--grey);text-decoration:line-through;text-decoration-color:var(--red)}
+  .verdict .vfoot{font-family:var(--sans);margin-top:14px;font-size:13px;color:var(--grey)}
+  .verdict .vfoot a{color:var(--red);font-weight:600;text-decoration:none}
+
+  /* ====================== REVEAL ====================== */
+  .fadeup{opacity:1;transform:none}
+  .js .fadeup{opacity:0;transform:translateY(14px);transition:opacity .7s ease, transform .7s ease}
+  .js .fadeup.in{opacity:1;transform:none}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+    .fadeup,.js .fadeup{opacity:1;transform:none}
+    .note,.js .note{opacity:1;transform:none}
+    .flow-step,.js .flow-step{opacity:1;transform:none}
+    .mark,.js .mark{background-size:100% 100%}
+    .sticker.float{animation:none}
+  }
+
+  /* ====================== RESPONSIVE ====================== */
+  @media (max-width:1180px){
+    :root{--sheet-max:680px}
+    .note.right{right:-188px;width:180px}
+    .note.left{left:-186px;width:180px}
+  }
+  @media (max-width:1080px){
+    /* прячем поля-пометки, показываем inline-фолбэк; стикеры остаются на листе */
+    .note{display:none}
+    .inline-note{display:block}
+    .layout{max-width:700px}
+  }
+  @media (max-width:860px){
+    .topbar-inner{padding:12px 18px}
+    nav.mainnav{display:none}
+    .burger{display:flex}
+    .stage{padding:32px 16px 24px}
+    .section{padding:22px 16px}
+    .sheet{padding:38px 26px 38px}
+    .sheet.compact{padding:34px 24px 34px}
+    h1.headline{font-size:30px}
+    h2.sec-title{font-size:25px}
+    .subhead{font-size:15px}
+    .flow{grid-template-columns:1fr 1fr;gap:12px}
+    .cases{grid-template-columns:1fr}
+    .two{grid-template-columns:1fr;gap:26px}
+    .form-card{grid-template-columns:1fr}
+    .faq-q{font-size:17px}
+    .faq-a-inner{font-size:15.5px}
+    .case .big{font-size:23px}
+    /* стикеры мельче на мобиле, не залезают за край */
+    .sticker{width:105px}
+    .sticker .bubble{display:none}
+    .footer-top{flex-direction:column;gap:16px}
+  }
+  @media (max-width:520px){
+    .sheet{padding:30px 18px 32px}
+    h1.headline{font-size:26px}
+    .flow{grid-template-columns:1fr}
+    .people{grid-template-columns:1fr}
+    .lm-panel{padding:26px 22px}
+    .sticker{width:90px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#top" class="logo">медиа<span class="sfera">сфера</span></a>
+    <nav class="mainnav">
+      <a href="#how">Как доводим</a>
+      <a href="#cases">Кейсы</a>
+      <a href="#team">Редакция</a>
+      <a href="#faq">Вопросы</a>
+    </nav>
+    <a href="#contact" class="btn-head" data-cta>Обсудить задачу</a>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#how">Как доводим</a>
+    <a href="#cases">Кейсы</a>
+    <a href="#team">Редакция</a>
+    <a href="#faq">Вопросы</a>
+    <a href="#contact" class="btn-head" data-cta>Обсудить задачу</a>
+  </div>
+</header>
+
+<!-- ============ A · HERO ============ -->
+<main class="stage" id="top">
+  <div class="layout">
+
+    <!-- margin notes -->
+    <div class="note right arrow-r" data-note style="top:118px">← это хук<small>цепляет за 3 секунды, иначе читатель ушёл</small></div>
+    <div class="note left arrow-l" data-note style="top:372px">а тут — заявка<small>читатель сам захотел обсудить задачу</small></div>
+
+    <!-- sticker: cat on the corner of the sheet -->
+    <div class="sticker float" style="--rot:7deg;top:-46px;right:-30px;transform:rotate(7deg);width:160px">
+      <img src="assets/cat-heart.png" alt="Кот-маскот Медиасферы">
+      <span class="bubble bl">тут начинается ваша воронка <b>↓</b></span>
+    </div>
+    <div class="sticker float" style="--rot:-8deg;bottom:84px;left:-40px;transform:rotate(-8deg);width:130px">
+      <img src="assets/brief.png" alt="Бриф">
+      <span class="bubble tr">всё начинается с брифа</span>
+    </div>
+
+    <article class="sheet tiltable" id="heroSheet">
+      <span class="corner-fold"></span>
+      <span class="kicker fadeup">Эта страница и есть пример нашей работы</span>
+
+      <h1 class="headline fadeup">Контент, который <span class="mark">продаёт</span>. Подтверждаем цифрами</h1>
+
+      <p class="subhead fadeup">Статьи для Яндекс ПромоСтраниц, Дзена, СМИ и блогов пишет собственная редакция — и мы ведём их до результата: <b>дочитывания → переходы → заявки → продажи</b>.</p>
+
+      <p class="inline-note">← это хук. Цепляет за 3 секунды<small>а ниже — путь до заявки</small></p>
+
+      <!-- diff card: было → стало (приём 2-1) -->
+      <div class="diffcard fadeup">
+        <h4>как мы правим заголовки</h4>
+        <div class="diff">
+          <span class="was">«Качественные статьи для бизнеса под ключ»</span>
+          <span class="now">«+45% продаж за 7 месяцев. Вот как»</span>
+        </div>
+        <div class="diff">
+          <span class="was">«Мы профессионалы своего дела»</span>
+          <span class="now">«Цену дочитки снизили с 22 до 7,14 ₽»</span>
+        </div>
+      </div>
+
+      <p class="byline fadeup"><span class="pen">✍</span>Пишет редакция «Медиасфера»: автор → редактор → корректор. Все сертифицированы Яндексом по ПромоСтраницам.</p>
+
+      <div class="cta-row fadeup">
+        <a href="#contact" class="btn-primary" data-cta>Обсудить задачу</a>
+        <button class="link-secondary" id="openLM" type="button"><span>Продаст или нет? Вставьте абзац — AI вынесет вердикт и даст 3 правки →</span></button>
+      </div>
+
+      <div class="chips fadeup">
+        <a href="#how" class="chip">Яндекс ПромоСтраницы</a>
+        <a href="#how" class="chip">Дзен под ключ</a>
+        <a href="#how" class="chip">Статьи в СМИ</a>
+        <a href="#how" class="chip">Корпоративные блоги</a>
+      </div>
+
+      <div class="trust fadeup">
+        <span><b>29 лет</b> на рынке</span>
+        <span><b>945 млн</b> охвата</span>
+        <span>партнёр Яндекса по ПромоСтраницам</span>
+        <span>Silver Mercury 2024</span>
+      </div>
+    </article>
+  </div>
+</main>
+
+<!-- ============ B · КАК ДОВОДИМ ДО ПРОДАЖ ============ -->
+<section class="section" id="how">
+  <div class="layout">
+    <div class="note right arrow-r" data-note style="top:120px">это и есть «как сделано»<small>раскрываем кухню прямо на листе</small></div>
+
+    <!-- sticker: cat-black commenting the schema -->
+    <div class="sticker float" style="--rot:8deg;top:-40px;left:-34px;transform:rotate(8deg);width:135px">
+      <img src="assets/cat-black.png" alt="Кот-маскот">
+      <span class="bubble br" style="left:78%;top:60%">текст без доставки <b>не продаёт</b></span>
+    </div>
+    <div class="sticker float" style="--rot:-7deg;bottom:-30px;right:-26px;transform:rotate(-7deg);width:130px">
+      <img src="assets/dog-read.png" alt="Пёс читает">
+      <span class="bubble tl">а тут считаем деньги, не знаки</span>
+    </div>
+
+    <article class="sheet compact tiltable">
+      <span class="corner-fold"></span>
+      <span class="kicker static fadeup">Раскрываем карты</span>
+      <h2 class="sec-title fadeup">Хороший текст не продаёт.<br>Продаёт <span class="mark">системный подход</span></h2>
+      <p class="subhead fadeup">Большинство агентств сдают файл — и всё. У нас в эту секунду работа только начинается. Вот путь одной статьи — от брифа до масштаба.</p>
+
+      <p class="inline-note">↑ это и есть «как сделано» — раскрываем кухню прямо на листе</p>
+
+      <div class="flow fadeup" id="flow">
+        <div class="flow-step"><div class="ic">Б</div><h4>Бриф и сценарий</h4><p>Подробный сценарий, а не «план в три строки». Согласуете до старта.</p></div>
+        <div class="flow-step"><div class="ic">Т</div><h4>Текст</h4><p>Пишет редакция: автор → редактор → корректор. Без случайных фрилансеров.</p></div>
+        <div class="flow-step flag"><div class="ic">Д</div><h4>Дистрибуция</h4><p>Доставляем туда, где её прочитает покупатель.</p><div class="branch"><span>ПромоСтраницы</span><span>Дзен</span><span>СМИ</span><span>блог</span></div></div>
+        <div class="flow-step"><div class="ic">Т</div><h4>Тесты</h4><p>Заголовки и обложки тестируем, пока не найдём связку.</p></div>
+        <div class="flow-step"><div class="ic">А</div><h4>Аналитика</h4><p>Дашборд: дочитки, переходы, цена клика и заявки, ROMI.</p></div>
+        <div class="flow-step"><div class="ic">М</div><h4>Масштаб</h4><p>Лучшие связки усиливаем, тёплых догоняем ретаргетингом.</p></div>
+      </div>
+
+      <div class="cta-row fadeup nomb"><a href="#contact" class="btn-primary" data-cta>Обсудить задачу</a></div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ C · КЕЙСЫ ============ -->
+<section class="section" id="cases">
+  <div class="layout">
+    <div class="note left arrow-l" data-note style="top:118px">тут считаем деньги<small>не «50 статей», а что они принесли</small></div>
+
+    <!-- sticker: cat-coins — «дочитки дешевле» -->
+    <div class="sticker float" style="--rot:9deg;top:-50px;right:-34px;transform:rotate(9deg);width:155px">
+      <img src="assets/cat-coins.png" alt="Кот с монетами — дочитки дешевле">
+      <span class="bubble bl">дочитки <b>дешевле</b> с каждым тестом</span>
+    </div>
+
+    <article class="sheet compact tiltable">
+      <span class="corner-fold"></span>
+      <span class="kicker static fadeup">Посчитано до денег</span>
+      <h2 class="sec-title fadeup">Кейсы, посчитанные <span class="mark">до денег</span></h2>
+      <p class="subhead fadeup">Не «написали много статей», а что они принесли. Каждую цифру можно проверить.</p>
+
+      <p class="inline-note">тут считаем деньги<small>не «50 статей», а результат</small></p>
+
+      <div class="cases">
+        <div class="case fadeup">
+          <span class="tape"></span>
+          <span class="chan">ПромоСтраницы · БАДы</span>
+          <div class="cname">Spice Active</div>
+          <div class="big"><span class="mark">+45%</span> продаж</div>
+          <div class="sub">За 7 месяцев. Цена дочитки — с 22 до 7,14 ₽.</div>
+          <a class="clink" href="https://vc.ru/marketing/1458781" target="_blank" rel="noopener">Разбор на VC.ru →</a>
+        </div>
+        <div class="case fadeup">
+          <span class="tape"></span>
+          <span class="chan">ПромоСтраницы · БАДы</span>
+          <div class="cname">Vitabeauty</div>
+          <div class="big">CPA <span class="mark">−72%</span></div>
+          <div class="sub">Со 100 до 28 ₽. 22 946 конверсий, 6 млн охвата.</div>
+        </div>
+        <div class="case fadeup">
+          <span class="tape"></span>
+          <span class="chan">Дзен · B2B-финансы</span>
+          <div class="cname">Ринфин</div>
+          <div class="big"><span class="mark">141</span> заявка</div>
+          <div class="sub">В сложном B2B — по 280–490 ₽. Там, где таргет молчит.</div>
+        </div>
+      </div>
+
+      <p class="softline fadeup">Нам доверяют бренды, которые умеют считать:</p>
+      <div class="logos fadeup">
+        <span>Hansa</span><span>Familia</span><span>Пиканта</span><span>Мегаптека</span><span>KIBERCAR</span><span>Spice Active</span>
+      </div>
+
+      <div class="cta-row fadeup nomb" style="margin-top:6px"><a href="#contact" class="btn-primary" data-cta>Хочу разбор по моей нише</a></div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ D · РЕДАКЦИЯ + ЯНДЕКС ============ -->
+<section class="section" id="team">
+  <div class="layout">
+    <div class="note right arrow-r" data-note style="top:130px">за плечом — Яндекс<small>кампании ведут те, кто учит рынок</small></div>
+
+    <!-- sticker: cat-black peeking -->
+    <div class="sticker float" style="--rot:-9deg;top:-44px;left:-32px;transform:rotate(-9deg);width:125px">
+      <img src="assets/cat-black.png" alt="Кот-маскот">
+      <span class="bubble br" style="left:78%;top:60%">не биржа — <b>штатная редакция</b></span>
+    </div>
+
+    <article class="sheet compact tiltable">
+      <span class="corner-fold"></span>
+      <span class="kicker static fadeup">Кто это пишет</span>
+      <h2 class="sec-title fadeup">Пишет не биржа.<br>Пишет <span class="mark">редакция</span></h2>
+
+      <p class="inline-note">↑ кто это писал — штатная редакция полного цикла</p>
+
+      <div class="two">
+        <div>
+          <p class="subhead fadeup" style="margin-bottom:6px">Над каждым текстом — полный цикл: <b>автор</b> пишет, <b>редактор</b> выстраивает смыслы, <b>корректор</b> вычищает. Все сертифицированы по ПромоСтраницам.</p>
+          <span class="flow-arrow fadeup">автор → редактор → корректор ✓</span>
+          <div class="people fadeup">
+            <div class="person"><div class="av">ТУ</div><div><b>Тимур Угулава</b><span>совладелец, официальный эксперт Яндекс Рекламы по ПромоСтраницам</span></div></div>
+            <div class="person"><div class="av">МБ</div><div><b>Майя Блюм</b><span>главный редактор — смыслы и качество</span></div></div>
+            <div class="person"><div class="av">КУ</div><div><b>Ксения Угулава</b><span>продюсер контент-направления</span></div></div>
+            <div class="person"><div class="av">+</div><div><b>Авторы и корректоры</b><span>штатная команда под вашу нишу</span></div></div>
+          </div>
+        </div>
+        <div class="fadeup">
+          <div class="trophies">
+            <h3>Нас рекомендует сам Яндекс</h3>
+            <div class="tsub">Ваши кампании ведут те, кто учит рынок</div>
+            <ul>
+              <li><span class="tk">★</span><div><b>Сертифицированный партнёр</b> Яндекса с 2011 года</div></li>
+              <li><span class="tk">⚡</span><div><b>Эксперт Яндекс Рекламы</b> по ПромоСтраницам в команде</div></li>
+              <li><span class="tk">🏆</span><div><b>Silver Mercury 2024</b> — лучшая брендформанс-кампания</div></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-row fadeup nomb" style="margin-top:20px"><a href="#contact" class="btn-primary" data-cta>Обсудить задачу</a></div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ E · ФИНАЛ (FAQ + ФОРМА) ============ -->
+<section class="section" id="contact">
+  <div class="layout">
+    <div class="note left arrow-l" data-note style="top:128px">остальное спросим<br>сами<small>без брифов на 40 полей</small></div>
+
+    <!-- sticker: cat-heart at the finish -->
+    <div class="sticker float" style="--rot:8deg;top:-48px;right:-30px;transform:rotate(8deg);width:120px">
+      <img src="assets/cat-heart.png" alt="Кот-маскот">
+      <span class="bubble bl">вернёмся в течение <b>рабочего дня</b></span>
+    </div>
+
+    <article class="sheet tiltable">
+      <span class="corner-fold"></span>
+      <span class="kicker static fadeup">Поехали</span>
+      <h2 class="sec-title fadeup">Расскажите о продукте —<br>предложим, <span class="mark">как продать его контентом</span></h2>
+
+      <!-- mini FAQ -->
+      <div class="faq fadeup">
+        <div class="faq-item">
+          <button class="faq-q" type="button"><span class="qn">01</span><span>Мы небольшая компания. Подойдёт?</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Да. Отбираем не по выручке, а по задаче. Если статейный канал вам не подходит — скажем честно на первом созвоне.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button"><span class="qn">02</span><span>Когда ждать первых результатов?</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Рабочий горизонт теста — один цикл вашей сделки: за это время видно дочитывания, переходы и первые заявки. Долгосрочный рост брендового спроса измеряем месяцами.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button"><span class="qn">03</span><span>Работаете со «сложными» нишами — БАДы, фарма, B2B?</span></button>
+          <div class="faq-a"><div class="faq-a-inner">Да, это наша специализация. БАДы и фарма проходят модерацию с нашим сопровождением, в B2B умеем работать с длинным циклом сделки. Сомневаетесь — спросите до старта.</div></div>
+        </div>
+      </div>
+
+      <div class="form-card">
+        <form class="lead-form fadeup" onsubmit="return false">
+          <div class="formnote">осталось пара полей — остальное спросим сами</div>
+          <div class="field"><label for="f-name">Имя</label><input id="f-name" type="text" placeholder="Как к вам обращаться"></div>
+          <div class="field">
+            <label>Как удобнее связаться</label>
+            <div class="seg" id="seg">
+              <button type="button" class="on" data-m="Telegram">Telegram</button>
+              <button type="button" data-m="Телефон">Телефон</button>
+              <button type="button" data-m="Почта">Почта</button>
+            </div>
+            <input id="f-contact" type="text" placeholder="@username в Telegram">
+          </div>
+          <div class="field"><label for="f-task">О задаче <span class="opt">(необязательно)</span></label><textarea id="f-task" placeholder="Пара слов о продукте — остальное спросим сами"></textarea></div>
+          <button class="btn-primary" style="width:100%;justify-content:center" id="f-submit">Обсудить задачу</button>
+          <div class="microcopy">Вернёмся в течение рабочего дня. Без рассылок и звонков «как вы там».</div>
+          <div class="form-sent" id="formSent">Спасибо! Мы получили заявку и вернёмся в течение рабочего дня.</div>
+        </form>
+
+        <div class="alt fadeup">
+          <h3>Пока не готовы к разговору?</h3>
+          <p>Проверьте свой текст на AI-разборе «Продаст или нет» — увидите, как мы думаем над текстом, ещё до брифа.</p>
+          <a href="#" id="openLM2">→ Открыть разбор «Продаст или нет»</a>
+          <div class="div"></div>
+          <h4>Что будет после заявки</h4>
+          <p>Короткий созвон → разбор вашей ниши → предложение по каналам и сценарию.</p>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <a href="#top" class="logo">медиа<span class="sfera">сфера</span></a>
+      <div class="footer-links">
+        <a href="#cases">Кейсы</a>
+        <a href="#team">Редакция</a>
+        <a href="#faq">Вопросы</a>
+        <a href="https://t.me/" target="_blank" rel="noopener">Telegram агентства</a>
+      </div>
+    </div>
+    <div class="footer-meta">
+      © Медиасфера · контент, который продаёт · реквизиты по запросу
+      <span class="soft">В числе ведущих контент-агентств по версии Рейтинга Рунета — с отзывами клиентов на 5.0.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ LEAD-MAGNET MODAL ============ -->
+<div class="lm-backdrop" id="lmBackdrop">
+  <div class="lm-panel" role="dialog" aria-modal="true" aria-label="Продаст или нет">
+    <h3>Продаст или нет?</h3>
+    <p class="lm-sub">Вставьте заголовок, абзац или оффер — наш редактор (на базе ИИ) даст вердикт и 3 правки «было → стало». Бесплатно, без регистрации.</p>
+    <textarea id="lmInput" placeholder="Например: «Наша компания предлагает широкий спектр качественных услуг для вашего бизнеса по выгодным ценам…»"></textarea>
+    <div class="lm-actions">
+      <button class="btn-primary" id="lmRun">Проверить текст</button>
+      <button class="lm-close" id="lmClose">Закрыть</button>
+    </div>
+    <div class="verdict" id="lmVerdict">
+      <div class="score">Оценка: <b id="lmScore">—</b> / 100</div>
+      <div class="vlabel" id="lmLabel"></div>
+      <ol id="lmEdits"></ol>
+      <div class="vfoot">Это демо-разбор. Полную версию с правками под ваш текст сделаем на созвоне — <a href="#contact" id="lmToForm">обсудить задачу →</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // включаем JS-режим: до этого момента контент полностью виден (фолбэк)
+  document.documentElement.classList.add('js');
+
+  /* ---------- mobile menu ---------- */
+  var burger=document.getElementById('burger'), mm=document.getElementById('mobileMenu');
+  if(burger){
+    burger.addEventListener('click',function(){
+      var open=mm.classList.toggle('open'); burger.classList.toggle('open',open);
+      burger.setAttribute('aria-expanded',open?'true':'false');
+    });
+    mm.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){mm.classList.remove('open');burger.classList.remove('open');burger.setAttribute('aria-expanded','false');});});
+  }
+
+  /* ---------- reveal on scroll (с фолбэком: если IO нет — показываем всё) ---------- */
+  var revealEls=[].slice.call(document.querySelectorAll('.fadeup, .note, .flow'));
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+    },{threshold:.14, rootMargin:'0px 0px -8% 0px'});
+    revealEls.forEach(function(el){io.observe(el);});
+  } else {
+    revealEls.forEach(function(el){el.classList.add('in');});
+  }
+
+  /* ---------- marker fill on scroll ---------- */
+  var marks=[].slice.call(document.querySelectorAll('.mark'));
+  if('IntersectionObserver' in window){
+    var mio=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('lit'); mio.unobserve(e.target);} });
+    },{threshold:.9});
+    marks.forEach(function(m){mio.observe(m);});
+  } else {
+    marks.forEach(function(m){m.classList.add('lit');});
+  }
+
+  /* ---------- light parallax tilt of sheets (desktop only, subtle) ---------- */
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce && window.matchMedia('(min-width:861px)').matches){
+    var ticking=false, mx=0, my=0;
+    window.addEventListener('mousemove',function(ev){
+      mx=(ev.clientX/window.innerWidth-0.5);
+      my=(ev.clientY/window.innerHeight-0.5);
+      if(!ticking){ ticking=true; requestAnimationFrame(applyTilt); }
+    },{passive:true});
+    function applyTilt(){
+      ticking=false;
+      document.querySelectorAll('.tiltable').forEach(function(s){
+        var rx=(my*-1.4).toFixed(2), ry=(mx*1.8).toFixed(2);
+        s.style.transform='perspective(1400px) rotateX('+rx+'deg) rotateY('+ry+'deg)';
+      });
+    }
+  }
+
+  /* ---------- FAQ accordion ---------- */
+  document.querySelectorAll('.faq-q').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var item=btn.closest('.faq-item'), a=item.querySelector('.faq-a'), open=item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(o){ if(o!==item){o.classList.remove('open');o.querySelector('.faq-a').style.maxHeight=null;} });
+      if(open){ item.classList.remove('open'); a.style.maxHeight=null; }
+      else { item.classList.add('open'); a.style.maxHeight=a.scrollHeight+'px'; }
+    });
+  });
+
+  /* ---------- contact: segmented control + submit mock ---------- */
+  var ph={Telegram:'@username в Telegram',Телефон:'+7 (000) 000-00-00',Почта:'you@company.ru'};
+  document.querySelectorAll('#seg button').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('#seg button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      document.getElementById('f-contact').placeholder=ph[b.dataset.m]||'';
+    });
+  });
+  var submit=document.getElementById('f-submit');
+  if(submit){
+    submit.addEventListener('click',function(){
+      var n=document.getElementById('f-name'), c=document.getElementById('f-contact');
+      if(!n.value.trim()){n.focus();return;}
+      if(!c.value.trim()){c.focus();return;}
+      document.getElementById('formSent').classList.add('show');
+      submit.textContent='Заявка отправлена';
+      submit.style.background='var(--green)';
+    });
+  }
+
+  /* ---------- lead magnet (mock verdict + 3 edits) ---------- */
+  var bd=document.getElementById('lmBackdrop'), inp=document.getElementById('lmInput');
+  function openLM(e){ if(e)e.preventDefault(); bd.classList.add('open'); setTimeout(function(){inp.focus();},80); }
+  function closeLM(){ bd.classList.remove('open'); }
+  ['openLM','openLM2'].forEach(function(id){ var el=document.getElementById(id); if(el)el.addEventListener('click',openLM); });
+  document.getElementById('lmClose').addEventListener('click',closeLM);
+  bd.addEventListener('click',function(e){ if(e.target===bd)closeLM(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape')closeLM(); });
+  var toForm=document.getElementById('lmToForm');
+  if(toForm)toForm.addEventListener('click',function(){closeLM();});
+
+  // банк правок «было → стало» — детерминированная имитация AI-разбора
+  var EDITS=[
+    {was:'качественные услуги для вашего бизнеса', now:'+45% продаж за 7 месяцев'},
+    {was:'мы профессионалы своего дела', now:'1 798 статей, считаем результат в деньгах'},
+    {was:'индивидуальный подход к каждому клиенту', now:'разбор вашей ниши до первой строки'},
+    {was:'широкий спектр решений под ключ', now:'один продукт — статья, что приводит заявки'},
+    {was:'выгодные цены и гибкие условия', now:'цену дочитки снизили с 22 до 7,14 ₽'},
+    {was:'оставьте заявку прямо сейчас', now:'дочитайте — и сами захотите перейти'}
+  ];
+  function hash(s){ var h=0; for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;} return h; }
+  document.getElementById('lmRun').addEventListener('click',function(){
+    var t=(inp.value||'').trim();
+    var v=document.getElementById('lmVerdict');
+    if(t.length<8){ inp.focus(); return; }
+    var h=hash(t.toLowerCase());
+    var score=42 + (h % 34); // 42..75 — «есть что улучшить»
+    var label = score<55 ? 'Пока не продаёт: общие слова вместо выгоды и цифр.' :
+                score<68 ? 'Продаёт наполовину: есть зацепка, но не хватает конкретики.' :
+                           'Близко к рабочему: добавить цифры — и заголовок дочитают.';
+    document.getElementById('lmScore').textContent=score;
+    document.getElementById('lmLabel').textContent=label;
+    // 3 правки, выбранные детерминированно по хэшу
+    var idx=[h%EDITS.length,(h>>3)%EDITS.length,(h>>6)%EDITS.length];
+    if(idx[1]===idx[0])idx[1]=(idx[1]+1)%EDITS.length;
+    if(idx[2]===idx[0]||idx[2]===idx[1])idx[2]=(idx[2]+2)%EDITS.length;
+    var ol=document.getElementById('lmEdits'); ol.innerHTML='';
+    idx.forEach(function(i){
+      var e=EDITS[i], li=document.createElement('li');
+      li.innerHTML='<span class="was">«'+e.was+'»</span> <span class="now">«'+e.now+'»</span>';
+      ol.appendChild(li);
+    });
+    v.classList.add('show');
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Медиасфера — контент, который продаёт</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf8f4;            /* очень лёгкий тёплый off-white фон за листом */
+    --bg-2:#f4f1ea;          /* едва заметный градиентный край */
+    --sheet:#ffffff;
+    --ink:#1b1b1d;
+    --ink-soft:#36363a;
+    --grey:#6c6c70;
+    --red:#E30613;
+    --red-dark:#bd0005;
+    --marker:#ffe680;        /* жёлтый маркер */
+    --green:#1f9d52;
+    --line:rgba(27,27,29,.10);
+    --serif:'Lora',Georgia,'Times New Roman',serif;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --hand:'Caveat',cursive;
+    --sheet-max:760px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{
+    font-family:var(--sans);color:var(--ink);line-height:1.55;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    overflow-x:hidden;
+    /* лёгкий воздушный фон: тёплый off-white + почти невидимая «бумажная» текстура */
+    background:
+      radial-gradient(120% 80% at 50% -10%, #ffffff 0%, var(--bg) 42%, var(--bg-2) 100%);
+    background-attachment:fixed;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.35;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  }
+
+  /* ============ HEADER ============ */
+  header.topbar{
+    position:sticky;top:0;z-index:60;
+    background:rgba(250,248,244,.82);
+    backdrop-filter:saturate(180%) blur(14px);
+    -webkit-backdrop-filter:saturate(180%) blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    max-width:1180px;margin:0 auto;padding:13px 30px;
+    display:flex;align-items:center;justify-content:space-between;gap:22px;
+  }
+  .logo{
+    font-family:var(--sans);font-weight:700;font-size:21px;letter-spacing:-.02em;
+    color:var(--ink);text-decoration:none;user-select:none;white-space:nowrap;
+  }
+  .logo .sfera{color:var(--red)}
+  nav.mainnav{display:flex;align-items:center;gap:26px}
+  nav.mainnav a{
+    font-size:14.5px;font-weight:500;color:var(--ink);text-decoration:none;
+    opacity:.8;transition:opacity .18s ease;position:relative;
+  }
+  nav.mainnav a::after{content:"";position:absolute;left:0;right:100%;bottom:-4px;height:2px;background:var(--red);transition:right .28s ease}
+  nav.mainnav a:hover{opacity:1}
+  nav.mainnav a:hover::after{right:0}
+  .btn-head{
+    font-family:var(--sans);font-size:14.5px;font-weight:600;
+    background:var(--red);color:#fff;border:none;cursor:pointer;
+    padding:10px 20px;border-radius:9px;text-decoration:none;white-space:nowrap;
+    transition:background .18s ease, transform .18s ease, box-shadow .18s ease;
+    box-shadow:0 6px 16px -9px rgba(227,6,19,.6);
+  }
+  .btn-head:hover{background:var(--red-dark);transform:translateY(-1px)}
+  .burger{display:none;background:none;border:none;cursor:pointer;width:40px;height:40px;flex-direction:column;justify-content:center;gap:5px;padding:8px}
+  .burger span{display:block;height:2px;width:22px;background:var(--ink);border-radius:2px;transition:transform .22s ease,opacity .22s ease}
+  .burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+  .burger.open span:nth-child(2){opacity:0}
+  .burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+  .mobile-menu{display:none;border-top:1px solid var(--line);background:rgba(250,248,244,.98);padding:8px 18px 16px}
+  .mobile-menu.open{display:block;animation:fadeIn .2s ease}
+  .mobile-menu a{display:block;padding:12px 4px;font-size:16px;font-weight:500;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+  .mobile-menu a:last-child{border-bottom:none}
+  .mobile-menu .btn-head{display:inline-block;margin-top:12px}
+
+  /* ============ STAGE / SECTIONS ============ */
+  .stage{min-height:calc(100vh - 58px);padding:46px 24px 60px;display:flex;justify-content:center}
+  .section{padding:30px 24px 30px;display:flex;justify-content:center}
+  .layout{position:relative;width:100%;max-width:var(--sheet-max)}
+
+  /* ============ THE SHEET (документ) ============ */
+  .sheet{
+    background:var(--sheet);border-radius:8px;position:relative;
+    padding:60px 70px 54px;
+    box-shadow:
+      0 1px 1px rgba(27,27,29,.04),
+      0 2px 6px rgba(27,27,29,.04),
+      0 34px 70px -30px rgba(27,27,29,.22),
+      0 10px 26px -16px rgba(27,27,29,.14);
+    /* тонкая «полоска поля» как в тетради — едва заметная */
+    background-image:linear-gradient(90deg, transparent 0, transparent 46px, rgba(227,6,19,.07) 46px, rgba(227,6,19,.07) 47px, transparent 47px);
+    will-change:transform;
+  }
+  .sheet.compact{padding:50px 70px 46px}
+  /* приклеенный скотч сверху листа */
+  .sheet::before{
+    content:"";position:absolute;top:-13px;left:50%;transform:translateX(-50%) rotate(-1.4deg);
+    width:128px;height:26px;background:rgba(255,230,128,.55);
+    border:1px solid rgba(210,180,70,.4);border-radius:2px;
+    box-shadow:0 4px 10px -6px rgba(0,0,0,.25);
+  }
+
+  .kicker{
+    font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--red);
+    display:inline-flex;align-items:center;gap:9px;margin-bottom:22px;
+  }
+  .kicker::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--red);display:inline-block;animation:pulseDot 2.4s ease-in-out infinite}
+  .kicker.static::before{animation:none}
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 0 rgba(227,6,19,.4)}50%{box-shadow:0 0 0 5px rgba(227,6,19,0)}}
+
+  h1.headline{font-family:var(--serif);font-weight:600;font-size:42px;line-height:1.14;letter-spacing:-.015em;color:var(--ink);margin-bottom:6px}
+  h2.sec-title{font-family:var(--serif);font-weight:600;font-size:31px;line-height:1.2;letter-spacing:-.014em;color:var(--ink);margin-bottom:14px}
+  h3.sub-title{font-family:var(--serif);font-weight:600;font-size:21px;line-height:1.3;color:var(--ink);margin-bottom:12px}
+  .doc-meta{font-family:var(--sans);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--grey);font-weight:500;border-top:1px dashed var(--line);padding-top:9px;margin:12px 0 22px;display:inline-block}
+
+  .subhead{font-family:var(--sans);font-size:16.5px;line-height:1.6;color:var(--ink-soft);margin-bottom:26px;max-width:58ch}
+  .subhead b{color:var(--ink);font-weight:600}
+  .body-p{font-family:var(--serif);font-size:18px;line-height:1.7;color:var(--ink-soft);margin-bottom:20px}
+  .body-p:last-child{margin-bottom:0}
+  .body-p b{font-weight:600;color:var(--ink)}
+
+  /* маркер, закрашивается на скролле */
+  .mark{
+    background:linear-gradient(transparent 58%, var(--marker) 58%);
+    background-size:0% 100%;background-repeat:no-repeat;
+    padding:0 3px;font-weight:600;color:var(--ink);
+    box-decoration-break:clone;-webkit-box-decoration-break:clone;
+    border-radius:1px;
+  }
+  .reveal.in .mark{animation:markFill .6s ease .2s forwards}
+  @keyframes markFill{from{background-size:0% 100%}to{background-size:100% 100%}}
+
+  /* зачёркнутое «было» инлайн */
+  .was{color:var(--grey);text-decoration:line-through;text-decoration-color:var(--red);text-decoration-thickness:2px}
+
+  .divider{border:none;border-top:1px solid var(--line);margin:0 0 26px}
+  .divider.mt{margin-top:30px}
+
+  /* META TWIST */
+  .meta{border-left:4px solid var(--red);padding:5px 0 5px 20px;margin-bottom:28px}
+  .meta p{font-family:var(--serif);font-weight:600;font-size:22px;line-height:1.34;letter-spacing:-.01em;color:var(--ink)}
+  .meta .accent{color:var(--red)}
+
+  /* CTA */
+  .cta-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px}
+  .cta-row.nomb{margin-bottom:0}
+  .btn-primary{
+    font-family:var(--sans);font-size:16px;font-weight:600;
+    background:var(--red);color:#fff;border:none;cursor:pointer;
+    padding:15px 30px;border-radius:10px;text-decoration:none;white-space:nowrap;
+    transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
+    box-shadow:0 8px 18px -8px rgba(227,6,19,.55);
+  }
+  .btn-primary:hover{transform:translateY(-2px);background:var(--red-dark);box-shadow:0 14px 26px -10px rgba(189,0,5,.6)}
+  .link-secondary{
+    font-family:var(--sans);font-size:15px;font-weight:500;color:var(--ink);
+    text-decoration:none;cursor:pointer;background:none;border:none;padding:0;
+    line-height:1.4;max-width:38ch;text-align:left;
+  }
+  .link-secondary span{border-bottom:2px dashed var(--red);padding-bottom:2px;transition:color .18s ease,border-color .18s ease}
+  .link-secondary:hover span{color:var(--red-dark)}
+  .link-secondary .em{color:var(--red);font-weight:600}
+
+  /* CHIPS */
+  .chips{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:22px}
+  .chip{
+    font-family:var(--sans);font-size:13px;font-weight:500;color:var(--ink-soft);
+    background:var(--bg);border:1px solid var(--line);padding:7px 14px;border-radius:100px;
+    display:inline-flex;align-items:center;gap:7px;text-decoration:none;
+    transition:border-color .16s ease, color .16s ease, transform .16s ease;
+  }
+  a.chip:hover{border-color:var(--red);color:var(--red);transform:translateY(-1px)}
+  .chip::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--red);display:inline-block}
+
+  /* TRUST */
+  .trust{font-family:var(--sans);font-size:13px;color:var(--grey);border-top:1px solid var(--line);padding-top:16px;display:flex;flex-wrap:wrap;gap:6px 16px}
+  .trust span{display:inline-flex;align-items:center;white-space:nowrap}
+  .trust b{color:var(--ink);font-weight:600;margin:0 .25em}
+  .trust span+span::before{content:"·";margin-right:16px;color:rgba(27,27,29,.3)}
+
+  /* ============ FLOW (схема пути) ============ */
+  .flow{margin:6px 0 24px;display:flex;flex-direction:column}
+  .flow-step{
+    position:relative;padding:15px 18px 15px 58px;
+    border:1px solid var(--line);border-radius:13px;background:var(--bg);
+    margin-bottom:13px;
+    opacity:1;transform:none;
+    transition:opacity .55s ease, transform .55s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+  .flow.reveal.pre .flow-step{opacity:0;transform:translateY(10px)}
+  .flow.reveal.in .flow-step{opacity:1;transform:none}
+  .flow.reveal.in .flow-step:nth-child(1){transition-delay:.05s}
+  .flow.reveal.in .flow-step:nth-child(2){transition-delay:.14s}
+  .flow.reveal.in .flow-step:nth-child(3){transition-delay:.23s}
+  .flow.reveal.in .flow-step:nth-child(4){transition-delay:.32s}
+  .flow.reveal.in .flow-step:nth-child(5){transition-delay:.41s}
+  .flow.reveal.in .flow-step:nth-child(6){transition-delay:.5s}
+  .flow-step:hover{border-color:rgba(227,6,19,.35);box-shadow:0 10px 22px -16px rgba(27,27,29,.35)}
+  .flow-step:last-child{margin-bottom:0}
+  .flow-step .num{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:30px;height:30px;border-radius:50%;background:var(--red);color:#fff;font-family:var(--sans);font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .flow-step h4{font-family:var(--sans);font-size:16px;font-weight:700;color:var(--ink);margin-bottom:2px;letter-spacing:-.01em}
+  .flow-step p{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--grey)}
+  .flow-step .branch{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .flow-step .branch span{font-family:var(--sans);font-size:11.5px;font-weight:600;color:var(--red);background:#fff;border:1px solid rgba(227,6,19,.3);padding:3px 9px;border-radius:100px}
+  .flow-step::after{content:"";position:absolute;left:30px;bottom:-13px;width:2px;height:13px;background:rgba(227,6,19,.35)}
+  .flow-step:last-child::after{display:none}
+
+  /* ============ CASES ============ */
+  .cases{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:4px 0 22px}
+  .case{
+    border:1px solid var(--line);border-radius:14px;padding:22px 22px 20px;background:var(--bg);position:relative;
+    transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .case:nth-child(odd){transform:rotate(-.35deg)}
+  .case:nth-child(even){transform:rotate(.35deg)}
+  .case:hover{transform:translateY(-3px) rotate(0);box-shadow:0 18px 32px -20px rgba(27,27,29,.32);border-color:rgba(227,6,19,.4)}
+  .case-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:11px}
+  .case-tags span{font-family:var(--sans);font-size:10.5px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--grey);background:#fff;border:1px solid var(--line);padding:3px 9px;border-radius:100px}
+  .case-name{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);margin-bottom:8px}
+  .case-hero{font-family:var(--serif);font-size:25px;font-weight:700;line-height:1.18;color:var(--red);margin-bottom:8px;letter-spacing:-.01em}
+  .case-sub{font-family:var(--sans);font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+  .case-sub b{color:var(--ink);font-weight:600}
+  .case .case-link{display:inline-block;margin-top:11px;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--red);text-decoration:none;border-bottom:1px solid rgba(227,6,19,.4);padding-bottom:1px}
+  .case .case-link:hover{color:var(--red-dark)}
+  .case .stamp{position:absolute;top:12px;right:12px;font-family:var(--hand);font-weight:700;color:var(--green);font-size:17px;transform:rotate(7deg);border:2px solid var(--green);border-radius:7px;padding:0 8px;line-height:1.4;opacity:.9}
+
+  .logos{display:flex;flex-wrap:wrap;gap:9px 11px;align-items:center;margin:4px 0 16px}
+  .logo-pill{font-family:var(--sans);font-size:13.5px;font-weight:700;letter-spacing:.02em;color:#4a4a4a;background:var(--bg);border:1px solid var(--line);padding:8px 16px;border-radius:8px}
+  .softline{font-family:var(--serif);font-style:italic;font-size:14.5px;line-height:1.55;color:var(--grey);margin-bottom:4px}
+
+  /* ============ TEAM + YANDEX ============ */
+  .people{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:4px 0 22px}
+  .person{display:flex;gap:13px;align-items:flex-start;padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+  .person .ava{flex-shrink:0;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;font-family:var(--serif);font-weight:600;font-size:17px;display:flex;align-items:center;justify-content:center}
+  .person .pname{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:2px;letter-spacing:-.01em}
+  .person .prole{font-family:var(--sans);font-size:12.5px;line-height:1.45;color:var(--grey)}
+  .trophies{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin:4px 0 20px}
+  .trophy{padding:15px 16px 15px 46px;border:1px solid var(--line);border-radius:12px;background:var(--bg);position:relative}
+  .trophy::before{content:"";position:absolute;left:15px;top:17px;width:18px;height:18px;border-radius:4px;background:var(--marker);border:2px solid var(--red)}
+  .trophy b{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--ink);display:block;margin-bottom:2px}
+  .trophy span{font-family:var(--sans);font-size:12.5px;line-height:1.42;color:var(--grey)}
+
+  /* ============ FAQ ============ */
+  .faq{margin:4px 0 6px}
+  .faq-item{border-top:1px solid var(--line)}
+  .faq-item:last-child{border-bottom:1px solid var(--line)}
+  .faq-q{width:100%;text-align:left;background:none;border:none;cursor:pointer;font-family:var(--serif);font-size:19px;font-weight:600;color:var(--ink);padding:19px 44px 19px 0;position:relative;line-height:1.35}
+  .faq-q::after{content:"+";position:absolute;right:6px;top:50%;transform:translateY(-50%);font-family:var(--sans);font-size:26px;font-weight:400;color:var(--red);transition:transform .25s ease;line-height:1}
+  .faq-item.open .faq-q::after{transform:translateY(-50%) rotate(45deg)}
+  .faq-a{max-height:0;overflow:hidden;transition:max-height .32s ease}
+  @media (prefers-reduced-motion:reduce){.faq-a{transition:none}}
+  .faq-a-inner{font-family:var(--serif);font-size:16px;line-height:1.62;color:var(--ink-soft);padding:0 36px 20px 0}
+
+  /* ============ FORM ============ */
+  .form-grid{display:flex;flex-direction:column;gap:16px;margin:6px 0 0}
+  .field label{display:block;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink);margin-bottom:7px;letter-spacing:.01em}
+  .field input, .field textarea{width:100%;font-family:var(--serif);font-size:16px;line-height:1.5;color:var(--ink);border:1px solid rgba(27,27,29,.18);border-radius:10px;padding:13px 15px;outline:none;background:#fff;transition:border-color .18s ease}
+  .field input:focus, .field textarea:focus{border-color:var(--red)}
+  .field textarea{min-height:80px;resize:vertical}
+  .field .opt{color:var(--grey);font-weight:500}
+  .seg{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:9px}
+  .seg button{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--ink-soft);background:var(--bg);border:1px solid rgba(27,27,29,.16);padding:9px 18px;border-radius:100px;cursor:pointer;transition:all .16s ease}
+  .seg button.on{background:var(--red);color:#fff;border-color:var(--red)}
+  .microcopy{font-family:var(--sans);font-size:13px;color:var(--grey);margin-top:12px;line-height:1.5}
+  .form-sent{display:none;margin-top:16px;padding:16px 18px;border-radius:10px;background:rgba(255,230,128,.3);border:1px solid rgba(227,6,19,.25);font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1.55}
+  .form-sent.show{display:block;animation:fadeIn .3s ease}
+  .relaunch-box{margin-top:28px;border-top:1px dashed var(--line);padding-top:22px}
+  .relaunch-box h3{font-family:var(--serif);font-size:20px;font-weight:600;margin-bottom:7px}
+  .relaunch-box p{font-family:var(--sans);font-size:14.5px;line-height:1.58;color:var(--ink-soft);margin-bottom:13px}
+
+  /* ============ FOOTER ============ */
+  footer.site-footer{background:#1b1b1d;color:#cfcfcf;padding:42px 24px 38px;margin-top:30px}
+  .footer-inner{max-width:var(--sheet-max);margin:0 auto}
+  .footer-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap;margin-bottom:22px;padding-bottom:22px;border-bottom:1px solid rgba(255,255,255,.12)}
+  .footer-top .logo{color:#fff}
+  .footer-links{display:flex;gap:20px;flex-wrap:wrap}
+  .footer-links a{font-family:var(--sans);font-size:14px;color:#cfcfcf;text-decoration:none;transition:color .16s ease}
+  .footer-links a:hover{color:#fff}
+  .footer-meta{font-family:var(--sans);font-size:12.5px;line-height:1.7;color:#9a9a9a}
+  .footer-meta .soft{color:#bdbdbd;font-style:italic;margin-top:9px;display:block}
+
+  /* ============ MARGIN NOTES (рукописные) ============ */
+  .note{
+    position:absolute;font-family:var(--hand);color:var(--red);
+    font-size:28px;line-height:1.14;font-weight:600;width:190px;z-index:7;
+    opacity:1;transform:none;
+    transition:opacity .55s ease, transform .55s ease;
+    pointer-events:none;
+  }
+  .reveal.pre .note, .note.pre{opacity:0;transform:translateY(8px)}
+  .note small{display:block;font-size:18.5px;font-weight:500;opacity:.9;margin-top:2px}
+  .note.right{right:-202px;text-align:left}
+  .note.left{left:-198px;text-align:right}
+  .note.arrow-r::before{content:"";position:absolute;left:-26px;top:9px;width:22px;height:2px;background:var(--red);opacity:.55}
+  .note.arrow-l::after{content:"";position:absolute;right:-26px;top:9px;width:22px;height:2px;background:var(--red);opacity:.55}
+
+  /* ============ STICKERS (коты-маскоты) ============ */
+  .sticker{
+    position:absolute;z-index:9;pointer-events:none;
+    filter:drop-shadow(0 12px 16px rgba(27,27,29,.22));
+    transition:transform .5s cubic-bezier(.2,.8,.3,1), opacity .5s ease;
+  }
+  .sticker img{display:block;width:100%;height:auto}
+  .reveal.pre .sticker, .sticker.pre{opacity:0;transform:scale(.8) rotate(0)}
+  /* лёгкое «дыхание» наклейки на ховер секции */
+  .sheet:hover .sticker.wiggle{transform:rotate(var(--rot,4deg)) translateY(-3px)}
+
+  /* inline machinery tag (когда поля-заметки скрыты на узких экранах) */
+  .inline-tag{display:none;font-family:var(--hand);color:var(--red);font-size:18px;font-weight:600;margin:-10px 0 16px}
+
+  /* ============ LEAD-MAGNET PANEL ============ */
+  .lm-backdrop{position:fixed;inset:0;z-index:100;background:rgba(27,27,29,.42);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:24px}
+  .lm-backdrop.open{display:flex;animation:fadeIn .2s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .lm-panel{background:#fff;border-radius:16px;box-shadow:0 30px 70px -20px rgba(27,27,29,.45);width:100%;max-width:580px;padding:32px 32px 28px;animation:popUp .26s cubic-bezier(.2,.8,.3,1);max-height:90vh;overflow:auto;position:relative}
+  @keyframes popUp{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+  .lm-panel .lm-kicker{font-family:var(--sans);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+  .lm-panel h3{font-family:var(--serif);font-size:24px;font-weight:600;margin-bottom:6px;line-height:1.18}
+  .lm-panel .lm-sub{font-size:14px;color:var(--grey);margin-bottom:16px;line-height:1.5}
+  .lm-panel textarea{width:100%;min-height:118px;resize:vertical;font-family:var(--serif);font-size:15.5px;line-height:1.6;color:var(--ink);border:1px solid rgba(27,27,29,.18);border-radius:11px;padding:14px 16px;outline:none;transition:border-color .18s ease}
+  .lm-panel textarea:focus{border-color:var(--red)}
+  .lm-actions{display:flex;gap:12px;align-items:center;margin-top:14px;flex-wrap:wrap}
+  .lm-actions .btn-primary{padding:12px 24px;font-size:15px}
+  .lm-actions .btn-primary.loading{opacity:.75;cursor:progress}
+  .lm-close{margin-left:auto;background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;color:var(--grey)}
+  .lm-close:hover{color:var(--ink)}
+  .lm-hint{font-family:var(--sans);font-size:12.5px;color:var(--grey)}
+  .verdict{margin-top:18px;display:none;border-top:1px dashed rgba(27,27,29,.18);padding-top:18px}
+  .verdict.show{display:block;animation:fadeIn .3s ease}
+  .verdict-head{display:flex;gap:15px;align-items:center;margin-bottom:14px}
+  .gauge{flex-shrink:0;width:72px;height:72px;border-radius:50%;display:grid;place-items:center;text-align:center;border:3px solid var(--marker);background:#fffaf0}
+  .gauge[data-tone=good]{border-color:var(--green);background:#f0faf3}
+  .gauge[data-tone=bad]{border-color:var(--red);background:#fff2f2}
+  .gauge .gnum{font-family:var(--serif);font-weight:700;font-size:26px;line-height:1;color:var(--ink)}
+  .gauge .gunit{font-size:10px;color:var(--grey)}
+  .vtag{font-family:var(--serif);font-weight:700;font-size:18px;line-height:1.1;color:var(--ink)}
+  .vsum{font-size:13px;color:var(--grey);margin-top:4px;line-height:1.45}
+  .edits-title{font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--red);margin:0 0 8px}
+  .edits{display:flex;flex-direction:column;gap:9px;margin:0;padding:0;list-style:none;counter-reset:fix}
+  .edit{display:flex;gap:11px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+  .edit-n{counter-increment:fix;flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--marker);color:var(--ink);font-family:var(--sans);font-weight:700;font-size:12px;display:grid;place-items:center;margin-top:1px}
+  .edit-n::before{content:counter(fix)}
+  .edit-was{font-size:13px;color:var(--grey);text-decoration:line-through;text-decoration-color:var(--red)}
+  .edit-now{font-size:13.5px;color:var(--ink);font-weight:600;margin-top:3px}
+  .edit-now::before{content:"→ ";color:var(--green);font-weight:700}
+  .vfoot{margin-top:15px;font-size:13px;color:var(--grey);line-height:1.5}
+  .vfoot a{color:var(--red);font-weight:600;text-decoration:none}
+
+  /* ============ REVEAL (с фолбэком: контент виден по умолчанию) ============ */
+  .reveal{opacity:1;transform:none}
+  .js .reveal.pre{opacity:0;transform:translateY(16px)}
+  .reveal{transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important}
+    .js .reveal.pre{opacity:1 !important;transform:none !important}
+    .note.pre,.sticker.pre{opacity:1 !important;transform:none !important}
+    .mark{background-size:100% 100% !important}
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:1240px){
+    :root{--sheet-max:700px}
+    .note.right{right:-190px;width:176px}
+    .note.left{left:-186px;width:176px}
+  }
+  @media (max-width:1080px){
+    .note{display:none}
+    .layout{max-width:700px}
+    .inline-tag{display:block}
+    /* стикеры держим, но прижимаем ближе к листу */
+  }
+  @media (max-width:860px){
+    .topbar-inner{padding:12px 18px}
+    nav.mainnav{display:none}
+    .burger{display:flex}
+    .stage{padding:30px 14px 44px}
+    .section{padding:22px 14px}
+    .sheet{padding:42px 26px 40px;background-image:none}
+    .sheet.compact{padding:38px 26px 36px}
+    h1.headline{font-size:31px}
+    h2.sec-title{font-size:25px}
+    .meta p{font-size:19px}
+    .body-p{font-size:16.5px}
+    .subhead{font-size:15px}
+    .cases{grid-template-columns:1fr}
+    .people{grid-template-columns:1fr}
+    .trophies{grid-template-columns:1fr}
+    .case:nth-child(odd),.case:nth-child(even){transform:none}
+    .faq-q{font-size:17px}
+    /* стикеры мельче на мобиле */
+    .sticker{transform:scale(.72)}
+    .js .reveal.pre .sticker, .sticker.pre{transform:scale(.62)}
+  }
+  @media (max-width:520px){
+    .sheet{padding:34px 20px 34px}
+    h1.headline{font-size:27px}
+    .case-hero{font-size:22px}
+    .lm-panel{padding:26px 22px}
+    .footer-top{flex-direction:column;gap:16px}
+    .sticker{display:none} /* совсем узкий экран — убираем, чтобы не наезжали */
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="#top" class="logo">медиа<span class="sfera">сфера</span></a>
+    <nav class="mainnav">
+      <a href="#how">Как доводим</a>
+      <a href="#cases">Кейсы</a>
+      <a href="#team">Редакция</a>
+      <a href="#contact">Контакты</a>
+    </nav>
+    <a href="#contact" class="btn-head" data-cta>Обсудить задачу</a>
+    <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#how">Как доводим до продаж</a>
+    <a href="#cases">Кейсы</a>
+    <a href="#team">Редакция и Яндекс</a>
+    <a href="#contact">Контакты</a>
+    <a href="#contact" class="btn-head" data-cta>Обсудить задачу</a>
+  </div>
+</header>
+
+<!-- ============ A. HERO ============ -->
+<main class="stage" id="top">
+  <div class="layout reveal pre">
+
+    <!-- margin notes -->
+    <div class="note right arrow-r" style="top:96px">это и есть наша работа<small>правим прямо у вас на глазах</small></div>
+    <div class="note left arrow-l" style="top:330px">цифра проверяемая<small>кейс Spice Active, ссылка ниже</small></div>
+
+    <!-- sticker: cat on the corner -->
+    <div class="sticker wiggle" style="top:-34px;right:-46px;width:148px;--rot:7deg;transform:rotate(7deg)">
+      <img src="assets/cat-heart.png" alt="">
+    </div>
+
+    <article class="sheet">
+      <span class="kicker">Документ редакции · в работе</span>
+
+      <h1 class="headline">Контент, который <span class="mark">продаёт</span></h1>
+      <span class="doc-meta">черновик → правки → чистовик → деньги</span>
+      <p class="inline-tag">← это и есть наша работа: правим прямо у вас на глазах</p>
+
+      <p class="subhead">Статьи для Яндекс ПромоСтраниц, Дзена, СМИ и блогов пишет <b>собственная редакция</b> — и мы ведём их до результата: дочитывания → переходы → заявки → продажи.</p>
+
+      <p class="body-p">Так в кейсе Spice Active цена дочитывания упала <span class="was">с 22&nbsp;₽</span> до <span class="mark">7,14&nbsp;₽</span>, а продажи выросли на <span class="mark">+45%</span>.</p>
+      <p class="inline-tag">↑ цифра проверяемая — кейс ниже</p>
+
+      <div class="cta-row">
+        <a href="#contact" class="btn-primary" data-cta>Обсудить задачу</a>
+        <button class="link-secondary" id="openLM" type="button">
+          <span>А ваш текст уже продаёт? Вставьте абзац — <span class="em">AI вынесет вердикт и 3 правки</span> →</span>
+        </button>
+      </div>
+
+      <div class="chips">
+        <a href="#cases" class="chip">Яндекс ПромоСтраницы</a>
+        <a href="#cases" class="chip">Дзен под ключ</a>
+        <a href="#cases" class="chip">Статьи в СМИ</a>
+        <a href="#cases" class="chip">Корпоративные блоги</a>
+      </div>
+
+      <div class="trust">
+        <span><b>29</b> лет на рынке</span>
+        <span><b>945 млн</b> суммарного охвата</span>
+        <span>пишет штатная редакция</span>
+      </div>
+    </article>
+  </div>
+</main>
+
+<!-- ============ B. КАК ДОВОДИМ ДО ПРОДАЖ ============ -->
+<section class="section" id="how">
+  <div class="layout reveal pre">
+    <div class="note right arrow-r" style="top:108px">текст — это шаг&nbsp;2<small>остальное — система до денег</small></div>
+    <div class="note left arrow-l" style="top:430px">узел дистрибуции<small>без доставки текст не продаёт</small></div>
+
+    <!-- sticker: brief -->
+    <div class="sticker wiggle" style="top:-30px;left:-42px;width:120px;--rot:-8deg;transform:rotate(-8deg)">
+      <img src="assets/brief.png" alt="">
+    </div>
+
+    <article class="sheet compact">
+      <span class="kicker static">Раскрываем кухню · путь одной статьи</span>
+      <h2 class="sec-title">Хороший текст не продаёт. Продаёт <span class="mark">система</span></h2>
+      <p class="subhead">Большинство агентств сдают файл — и на этом всё. У нас тут работа только начинается. Меряем не знаками, а <b>деньгами</b>.</p>
+
+      <div class="flow reveal pre">
+        <div class="flow-step"><span class="num">1</span><h4>Бриф и сценарий</h4><p>Подробный сценарий статьи — вы согласуете его до первой строки.</p></div>
+        <div class="flow-step"><span class="num">2</span><h4>Текст</h4><p>Штатная редакция полного цикла: автор → редактор → корректор.</p></div>
+        <div class="flow-step"><span class="num">3</span><h4>Дистрибуция</h4><p>Доставляем туда, где статью прочитает ваш покупатель.</p><div class="branch"><span>ПромоСтраницы</span><span>Дзен</span><span>СМИ</span><span>блог</span></div></div>
+        <div class="flow-step"><span class="num">4</span><h4>Тесты</h4><p>Заголовки и обложки гоняем, пока не найдём рабочую связку.</p></div>
+        <div class="flow-step"><span class="num">5</span><h4>Аналитика</h4><p>Дашборд: дочитывания, переходы, цена заявки, ROMI — цифры, не «всё хорошо».</p></div>
+        <div class="flow-step"><span class="num">6</span><h4>Масштаб</h4><p>Рабочие связки усиливаем, тёплых догоняем ретаргетингом.</p></div>
+      </div>
+
+      <div class="cta-row nomb">
+        <a href="#contact" class="btn-primary" data-cta>Обсудить задачу</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ C. КЕЙСЫ ============ -->
+<section class="section" id="cases">
+  <div class="layout reveal pre">
+    <div class="note right arrow-r" style="top:106px">считаем до денег<small>не «50 статей», а что они принесли</small></div>
+
+    <!-- sticker: cat with coins (дочитки дешевле) -->
+    <div class="sticker wiggle" style="bottom:88px;right:-58px;width:160px;--rot:8deg;transform:rotate(8deg)">
+      <img src="assets/cat-coins.png" alt="">
+    </div>
+
+    <article class="sheet compact">
+      <span class="kicker static">Примеры из практики · посчитано до денег</span>
+      <h2 class="sec-title">Кейсы, посчитанные <span class="mark">до денег</span></h2>
+      <p class="subhead">Не «написали много статей», а что эти статьи принесли. Каждую цифру можно проверить.</p>
+
+      <div class="cases">
+        <div class="case">
+          <span class="stamp">+45%</span>
+          <div class="case-tags"><span>ПромоСтраницы</span><span>БАДы</span></div>
+          <div class="case-name">Spice Active</div>
+          <div class="case-hero">+45% продаж</div>
+          <p class="case-sub">за 7 месяцев. Дочитка снижена <b>с 22 до 7,14&nbsp;₽</b>, 455&nbsp;597 переходов на Ozon.</p>
+          <a href="https://vc.ru/marketing/1458781" class="case-link" target="_blank" rel="noopener">Разбор на VC.ru →</a>
+        </div>
+        <div class="case">
+          <span class="stamp">−72%</span>
+          <div class="case-tags"><span>ПромоСтраницы</span><span>БАДы</span></div>
+          <div class="case-name">Vitabeauty</div>
+          <div class="case-hero">CPA −72%</div>
+          <p class="case-sub">со 100 до <b>28&nbsp;₽</b>. 22&nbsp;946 конверсий, 6&nbsp;млн охвата.</p>
+        </div>
+        <div class="case">
+          <span class="stamp">B2B</span>
+          <div class="case-tags"><span>Дзен</span><span>B2B-финансы</span></div>
+          <div class="case-name">Ринфин</div>
+          <div class="case-hero">141 заявка</div>
+          <p class="case-sub">в сложном B2B — <b>по 280–490&nbsp;₽</b>. Туда, где обычный таргет молчит.</p>
+        </div>
+        <div class="case">
+          <div class="case-tags"><span>ПромоСтраницы</span><span>Повседневный спрос</span></div>
+          <div class="case-name">Пиканта</div>
+          <div class="case-hero">12 293 конверсии</div>
+          <p class="case-sub">и <b>+155%</b> брендовых запросов. 21&nbsp;млн охвата, 587&nbsp;000 дочитываний.</p>
+        </div>
+      </div>
+
+      <p class="softline">Нам доверяют бренды, которые умеют считать:</p>
+      <div class="logos">
+        <span class="logo-pill">Hansa</span>
+        <span class="logo-pill">Familia</span>
+        <span class="logo-pill">Пиканта</span>
+        <span class="logo-pill">Мегаптека</span>
+        <span class="logo-pill">KIBERCAR</span>
+        <span class="logo-pill">Spice Active</span>
+      </div>
+
+      <div class="cta-row nomb" style="margin-top:6px">
+        <a href="#contact" class="btn-primary" data-cta>Хочу разбор по моей нише</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ D. РЕДАКЦИЯ + ЯНДЕКС ============ -->
+<section class="section" id="team">
+  <div class="layout reveal pre">
+    <div class="note left arrow-l" style="top:104px">не биржа<small>штатная редакция полного цикла</small></div>
+    <div class="note right arrow-r" style="top:430px">за плечом Яндекс<small>ведут те, кто учит рынок</small></div>
+
+    <!-- sticker: dog reading -->
+    <div class="sticker wiggle" style="bottom:54px;left:-50px;width:150px;--rot:-7deg;transform:rotate(-7deg)">
+      <img src="assets/dog-read.png" alt="">
+    </div>
+
+    <article class="sheet compact">
+      <span class="kicker static">Кто это пишет · редакция и партнёрство</span>
+      <h2 class="sec-title">Пишет не биржа. Пишет <span class="mark">редакция</span></h2>
+      <p class="subhead">Полный цикл над каждым текстом: <b>автор → редактор → корректор</b>. Все сертифицированы Яндексом по ПромоСтраницам.</p>
+
+      <div class="people">
+        <div class="person"><div class="ava">ТУ</div><div><div class="pname">Тимур Угулава</div><div class="prole">Совладелец, официальный эксперт Яндекс Рекламы по ПромоСтраницам</div></div></div>
+        <div class="person"><div class="ava">МБ</div><div><div class="pname">Майя Блюм</div><div class="prole">Главный редактор — отвечает за смыслы и качество</div></div></div>
+        <div class="person"><div class="ava">КУ</div><div><div class="pname">Ксения Угулава</div><div class="prole">Продюсер контент-направления — связывает редакцию и результат</div></div></div>
+        <div class="person"><div class="ava">+</div><div><div class="pname">Авторы · редакторы · корректоры</div><div class="prole">Команда полного цикла под вашу нишу</div></div></div>
+      </div>
+
+      <hr class="divider mt">
+      <h3 class="sub-title">Нас рекомендует сам Яндекс</h3>
+
+      <div class="trophies">
+        <div class="trophy"><b>Партнёр Яндекса с 2011 года</b><span>Сертифицированный партнёр — больше десяти лет внутри платформы</span></div>
+        <div class="trophy"><b>Эксперт Яндекс Рекламы в команде</b><span>Первыми пробуем новые функции ПромоСтраниц</span></div>
+        <div class="trophy"><b>Silver Mercury 2024</b><span>«Лучшая брендформанс-кампания» — отраслевое признание</span></div>
+        <div class="trophy"><b>Вся команда сертифицирована</b><span>Каждый специалист по ПромоСтраницам подтверждён Яндексом</span></div>
+      </div>
+
+      <div class="cta-row nomb">
+        <a href="#contact" class="btn-primary" data-cta>Обсудить задачу</a>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ E. ФИНАЛ — FAQ + ФОРМА ============ -->
+<section class="section" id="contact">
+  <div class="layout reveal pre">
+    <div class="note right arrow-r" style="top:96px">без бюджета и брифов<small>пара полей — остальное спросим сами</small></div>
+
+    <!-- sticker: black cat -->
+    <div class="sticker wiggle" style="top:-30px;right:-44px;width:130px;--rot:6deg;transform:rotate(6deg)">
+      <img src="assets/cat-black.png" alt="">
+    </div>
+
+    <article class="sheet">
+      <span class="kicker static">Перед стартом · короткие ответы</span>
+      <h2 class="sec-title">Что обычно <span class="mark">спрашивают</span></h2>
+
+      <div class="faq">
+        <div class="faq-item">
+          <button class="faq-q" type="button">Мы небольшая компания. Нам подойдёт?</button>
+          <div class="faq-a"><div class="faq-a-inner">Да. Отбираем не по выручке, а по задаче. Если статейный канал вашему продукту не подходит — скажем честно на первом созвоне.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button">Когда ждать первых результатов?</button>
+          <div class="faq-a"><div class="faq-a-inner">Первая неделя — обучение алгоритма. Рабочий горизонт теста — один цикл вашей сделки: за это время видны дочитывания, переходы и первые заявки.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" type="button">Кто будет писать и как разберётесь в нашей специфике?</button>
+          <div class="faq-a"><div class="faq-a-inner">Штатная редакция: автор → редактор → корректор. Сначала бриф и подробный сценарий, который вы согласуете. Работали с фармой, БАДами, B2B-финансами и недвижимостью.</div></div>
+        </div>
+      </div>
+
+      <hr class="divider mt" style="margin-top:30px">
+      <h3 class="sub-title">Расскажите о продукте — предложим, как его продать контентом</h3>
+      <p class="inline-tag">← без бюджета и брифов на 40 полей</p>
+
+      <form class="form-grid" onsubmit="return false" id="leadForm">
+        <div class="field">
+          <label for="f-name">Имя</label>
+          <input id="f-name" type="text" placeholder="Как к вам обращаться">
+        </div>
+        <div class="field">
+          <label>Как удобнее связаться</label>
+          <div class="seg" id="seg">
+            <button type="button" class="on" data-m="Telegram">Telegram</button>
+            <button type="button" data-m="Телефон">Телефон</button>
+            <button type="button" data-m="Почта">Почта</button>
+          </div>
+          <input id="f-contact" type="text" placeholder="@username в Telegram">
+        </div>
+        <div class="field">
+          <label for="f-task">О задаче <span class="opt">(необязательно)</span></label>
+          <textarea id="f-task" placeholder="Пара слов о продукте — остальное спросим сами"></textarea>
+        </div>
+        <button class="btn-primary" style="justify-content:center;text-align:center" id="f-submit" type="button">Обсудить задачу</button>
+        <div class="microcopy">Вернёмся в течение рабочего дня. Без рассылок и звонков «как вы там».</div>
+        <div class="form-sent" id="formSent">Спасибо! Мы получили заявку и вернёмся в течение рабочего дня.</div>
+      </form>
+
+      <div class="relaunch-box">
+        <h3>Пока не готовы к разговору?</h3>
+        <p>Проверьте свой текст на AI-разборе «Продаст или нет» — увидите, как мы думаем над текстом, ещё до брифа.</p>
+        <button class="link-secondary" id="openLM2" type="button"><span class="em">→ Открыть разбор «Продаст или нет»</span></button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <a href="#top" class="logo">медиа<span class="sfera">сфера</span></a>
+      <div class="footer-links">
+        <a href="#how">Как доводим</a>
+        <a href="#cases">Кейсы</a>
+        <a href="#team">Редакция</a>
+        <a href="#" target="_blank" rel="noopener">Telegram агентства</a>
+        <a href="#">Политика конфиденциальности</a>
+      </div>
+    </div>
+    <div class="footer-meta">
+      ООО «Медиасфера» · контент, который продаёт · реквизиты по запросу
+      <span class="soft">Мы и в числе ведущих контент-агентств по версии Рейтинга Рунета — с отзывами клиентов на 5.0.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ LEAD-MAGNET MODAL ============ -->
+<div class="lm-backdrop" id="lmBackdrop" aria-hidden="true">
+  <div class="lm-panel" role="dialog" aria-modal="true" aria-label="Проверка текста — продаст или нет">
+    <div class="lm-kicker">Лид-магнит · живой AI-разбор</div>
+    <h3>Продаст или нет?</h3>
+    <p class="lm-sub">Вставьте заголовок, абзац или оффер — редактор (на базе ИИ) даст вердикт и 3 правки «было → стало». Это демо: показываем, как мы думаем над текстом.</p>
+    <textarea id="lmInput" placeholder="Например: «Наша компания предлагает широкий спектр качественных услуг для вашего бизнеса по выгодным ценам…»"></textarea>
+    <div class="lm-actions">
+      <button class="btn-primary" id="lmRun" type="button">Проверить текст</button>
+      <span class="lm-hint" id="lmHint">Можно вставить даже один заголовок.</span>
+      <button class="lm-close" id="lmClose" type="button">Закрыть</button>
+    </div>
+    <div class="verdict" id="verdict">
+      <div class="verdict-head">
+        <div class="gauge" id="gauge"><div><span class="gnum" id="gnum">0</span><span class="gunit">/100</span></div></div>
+        <div>
+          <div class="vtag" id="vtag">—</div>
+          <div class="vsum" id="vsum">—</div>
+        </div>
+      </div>
+      <p class="edits-title">3 правки «было → стало»</p>
+      <ul class="edits" id="edits"></ul>
+      <div class="vfoot">Это упрощённое демо. Полный разбор с правками под вашу нишу делает живая редакция — <a href="#contact" id="vfootLink">обсудить задачу →</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  document.documentElement.classList.add('js');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- REVEAL с фолбэком: помечаем .pre только если JS жив, и обязательно снимаем по таймеру ---- */
+  var reveals = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  reveals.forEach(function(el){ if(!reduce) el.classList.add('pre'); });
+
+  function showAll(){ reveals.forEach(function(el){ el.classList.remove('pre'); el.classList.add('in'); }); }
+
+  if(reduce){
+    showAll();
+  } else if('IntersectionObserver' in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.remove('pre'); e.target.classList.add('in'); io.unobserve(e.target); }
+      });
+    }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
+    reveals.forEach(function(el){ io.observe(el); });
+    /* safety fallback: если что-то не сработало — через 2.5с всё показать */
+    setTimeout(showAll, 2500);
+  } else {
+    showAll();
+  }
+
+  /* ---- ЛЁГКИЙ PARALLAX листа (только на десктопе, аккуратно) ---- */
+  var sheets = Array.prototype.slice.call(document.querySelectorAll('.sheet'));
+  if(!reduce && window.innerWidth > 1080){
+    var ticking = false;
+    function parallax(){
+      var vh = window.innerHeight;
+      sheets.forEach(function(s){
+        var r = s.getBoundingClientRect();
+        var center = r.top + r.height/2;
+        var off = (center - vh/2) / vh;            // -1..1
+        var shift = Math.max(-10, Math.min(10, -off * 10));
+        s.style.transform = 'translateY(' + shift.toFixed(2) + 'px)';
+      });
+      ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+      if(!ticking){ window.requestAnimationFrame(parallax); ticking = true; }
+    }, {passive:true});
+    parallax();
+  }
+
+  /* ---- МОБИЛЬНОЕ МЕНЮ ---- */
+  var burger = document.getElementById('burger');
+  var mobileMenu = document.getElementById('mobileMenu');
+  burger.addEventListener('click', function(){
+    var open = burger.classList.toggle('open');
+    mobileMenu.classList.toggle('open', open);
+    burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  mobileMenu.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click', function(){
+      burger.classList.remove('open'); mobileMenu.classList.remove('open');
+      burger.setAttribute('aria-expanded','false');
+    });
+  });
+
+  /* ---- FAQ АККОРДЕОН ---- */
+  document.querySelectorAll('.faq-q').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var item = btn.closest('.faq-item');
+      var a = item.querySelector('.faq-a');
+      var isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item.open').forEach(function(o){
+        if(o!==item){ o.classList.remove('open'); o.querySelector('.faq-a').style.maxHeight = null; }
+      });
+      if(isOpen){ item.classList.remove('open'); a.style.maxHeight = null; }
+      else{ item.classList.add('open'); a.style.maxHeight = a.scrollHeight + 'px'; }
+    });
+  });
+
+  /* ---- ФОРМА: переключатель канала + отправка-мок ---- */
+  var ph = {Telegram:'@username в Telegram', 'Телефон':'+7 (000) 000-00-00', 'Почта':'you@company.ru'};
+  var contact = document.getElementById('f-contact');
+  document.querySelectorAll('#seg button').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('#seg button').forEach(function(x){x.classList.remove('on');});
+      b.classList.add('on');
+      contact.placeholder = ph[b.dataset.m] || '';
+    });
+  });
+  document.getElementById('f-submit').addEventListener('click', function(){
+    var name = document.getElementById('f-name');
+    if(!name.value.trim()){ name.focus(); return; }
+    if(!contact.value.trim()){ contact.focus(); return; }
+    document.getElementById('formSent').classList.add('show');
+    this.textContent = 'Заявка отправлена';
+    this.style.background = 'var(--green)';
+    this.disabled = true;
+  });
+
+  /* ---- ЛИД-МАГНИТ: открытие/закрытие ---- */
+  var backdrop = document.getElementById('lmBackdrop');
+  function openLM(){ backdrop.classList.add('open'); backdrop.setAttribute('aria-hidden','false'); setTimeout(function(){ document.getElementById('lmInput').focus(); }, 60); }
+  function closeLM(){ backdrop.classList.remove('open'); backdrop.setAttribute('aria-hidden','true'); }
+  document.getElementById('openLM').addEventListener('click', openLM);
+  document.getElementById('openLM2').addEventListener('click', openLM);
+  document.getElementById('lmClose').addEventListener('click', closeLM);
+  backdrop.addEventListener('click', function(e){ if(e.target===backdrop) closeLM(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape' && backdrop.classList.contains('open')) closeLM(); });
+  document.getElementById('vfootLink').addEventListener('click', closeLM);
+
+  /* ---- ЛИД-МАГНИТ: мок-вердикт + 3 правки ---- */
+  var WEAK = [
+    {re:/широк(ий|ого|ому) спектр|спектр услуг/i, was:'широкий спектр качественных услуг', now:'статья, после которой покупают именно ваш продукт', why:'абстракция'},
+    {re:/индивидуальн\w* подход/i, was:'индивидуальный подход к каждому', now:'сценарий под вашу нишу — согласуете до первой строки', why:'штамп'},
+    {re:/качествен\w+/i, was:'качественный текст', now:'текст, который снизил цену дочитки до 7,14 ₽', why:'оценочное без цифр'},
+    {re:/professional|профессионал\w*/i, was:'мы профессионалы своего дела', now:'29 лет, 945 млн охвата — считаем в деньгах', why:'о себе, не о выгоде'},
+    {re:/выгодн\w+ цен|низк\w+ цен|доступн\w+ цен/i, was:'по выгодным ценам', now:'+45% продаж за 7 месяцев — вот результат', why:'цена вместо ценности'},
+    {re:/лидер\w* рынка|№\s*1|номер один/i, was:'лидер рынка', now:'партнёр Яндекса с 2011 года, Silver Mercury 2024', why:'голословное лидерство'},
+    {re:/комплексн\w+ решени/i, was:'комплексное решение под ключ', now:'путь статьи: бриф → текст → дистрибуция → заявки', why:'размытое обещание'}
+  ];
+  var GENERIC = [
+    {was:'длинное вступление «о компании»', now:'первая строка — про боль читателя, а не про вас', why:'нет хука в первых 3 секундах'},
+    {was:'нет ни одной цифры', now:'добавьте проверяемый результат: %, ₽, срок', why:'факты повышают доверие'},
+    {was:'абзац без призыва', now:'в конце — один понятный следующий шаг', why:'читатель не знает, что делать дальше'}
+  ];
+
+  function buildEdits(text){
+    var found = [];
+    WEAK.forEach(function(p){ if(p.re.test(text) && found.length<3) found.push({was:p.was, now:p.now}); });
+    var gi = 0;
+    while(found.length < 3 && gi < GENERIC.length){ found.push({was:GENERIC[gi].was, now:GENERIC[gi].now}); gi++; }
+    return found.slice(0,3);
+  }
+  function scoreText(text){
+    var t = text.trim();
+    var s = 52;
+    if(/\d/.test(t)) s += 10;                                   // есть цифры
+    if(/[?!]/.test(t)) s += 4;                                  // эмоция/вопрос
+    if(t.length > 60 && t.length < 600) s += 6;                 // нормальная длина
+    WEAK.forEach(function(p){ if(p.re.test(t)) s -= 9; });      // штампы
+    if(/\bвы\b|\bваш/i.test(t)) s += 6;                         // обращение к читателю
+    if(t.length < 25) s -= 12;
+    s = Math.max(18, Math.min(88, s + (t.length % 7) - 3));
+    return Math.round(s);
+  }
+
+  var verdict = document.getElementById('verdict');
+  var runBtn = document.getElementById('lmRun');
+  function runVerdict(){
+    var text = document.getElementById('lmInput').value;
+    if(!text.trim()){ document.getElementById('lmInput').focus(); document.getElementById('lmHint').textContent = 'Вставьте хотя бы заголовок.'; return; }
+    runBtn.classList.add('loading'); runBtn.textContent = 'Анализирую…';
+    setTimeout(function(){
+      var sc = scoreText(text);
+      var edits = buildEdits(text);
+      var tone = sc >= 70 ? 'good' : (sc >= 45 ? 'mid' : 'bad');
+      var tag = sc >= 70 ? 'Скорее продаёт' : (sc >= 45 ? 'Продаёт наполовину' : 'Пока не продаёт');
+      var sum = sc >= 70 ? 'Хорошая база. Доведём до денег точечными правками.' :
+                (sc >= 45 ? 'Есть смысл, но мешают штампы и нехватка фактов.' :
+                 'Много общих слов и мало конкретики — читатель не дочитает.');
+      document.getElementById('gnum').textContent = sc;
+      document.getElementById('gauge').setAttribute('data-tone', tone);
+      document.getElementById('vtag').textContent = tag;
+      document.getElementById('vsum').textContent = sum;
+      var ul = document.getElementById('edits'); ul.innerHTML = '';
+      edits.forEach(function(e){
+        var li = document.createElement('li'); li.className = 'edit';
+        li.innerHTML = '<span class="edit-n"></span><div><div class="edit-was">'+e.was+'</div><div class="edit-now">'+e.now+'</div></div>';
+        ul.appendChild(li);
+      });
+      verdict.classList.add('show');
+      runBtn.classList.remove('loading'); runBtn.textContent = 'Проверить ещё раз';
+    }, 650);
+  }
+  runBtn.addEventListener('click', runVerdict);
+  document.getElementById('lmInput').addEventListener('keydown', function(e){
+    if((e.metaKey || e.ctrlKey) && e.key === 'Enter') runVerdict();
+  });
+})();
+</script>
+</body>
+</html>

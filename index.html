@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Медиасфера — гибрид-фаворит, 3 варианта</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{ --red:#E30613; --ink:#15161a; --bg:#0e0f13; --card:#1a1c22; --mut:#9aa0ad; --line:#2a2d36 }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{ font-family:'Inter',sans-serif; background:var(--bg); color:#fff; -webkit-font-smoothing:antialiased }
+  .wrap{ max-width:1240px; margin:0 auto; padding:0 32px }
+  header{ padding:54px 0 34px; border-bottom:1px solid var(--line) }
+  .brand{ font-weight:800; font-size:20px; letter-spacing:-.5px } .brand b{ color:var(--red) }
+  h1{ font-size:clamp(30px,4vw,46px); font-weight:900; letter-spacing:-1.2px; margin-top:24px; line-height:1.06 }
+  .sub{ color:var(--mut); font-size:17px; margin-top:14px; max-width:760px; line-height:1.55 }
+  .meta{ display:flex; gap:10px; flex-wrap:wrap; margin-top:20px }
+  .badge{ background:var(--card); border:1px solid var(--line); color:#c7ccd6; font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:30px } .badge b{ color:#fff }
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; padding:40px 0 70px }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:18px; overflow:hidden; transition:.2s; display:flex; flex-direction:column }
+  .card:hover{ transform:translateY(-4px); border-color:var(--red); box-shadow:0 26px 60px -30px rgba(227,6,19,.5) }
+  .prev{ position:relative; height:280px; overflow:hidden; border-bottom:1px solid var(--line); background:#fff }
+  .prev iframe{ width:1280px; height:900px; border:0; transform:scale(.33); transform-origin:top left; pointer-events:none }
+  .prev .num{ position:absolute; top:14px; left:14px; z-index:2; background:var(--red); color:#fff; font-weight:800; font-size:13px; padding:5px 11px; border-radius:8px }
+  .card-b{ padding:22px 24px 24px; flex:1; display:flex; flex-direction:column }
+  .card h3{ font-size:20px; font-weight:800; letter-spacing:-.3px }
+  .card .idea{ color:var(--mut); font-size:14px; line-height:1.5; margin-top:10px; flex:1 }
+  .open{ display:inline-flex; align-items:center; gap:8px; margin-top:18px; background:#fff; color:var(--ink); text-decoration:none; font-weight:700; font-size:15px; padding:12px 20px; border-radius:10px; align-self:flex-start; transition:.15s }
+  .open:hover{ background:var(--red); color:#fff }
+  footer{ border-top:1px solid var(--line); padding:24px 0 60px; color:var(--mut); font-size:13.5px; line-height:1.6 }
+  @media(max-width:900px){ .grid{ grid-template-columns:1fr } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">медиа<b>сфера</b> · гибрид-фаворит</div>
+    <h1>Гибрид-фаворит. Три исполнения одной идеи</h1>
+    <p class="sub">Белый лист-документ на лёгком воздушном фоне, рукописные правки и стикеры-коты, контент урезан до основного. Один и тот же гибрид в трёх акцентах — выбираем исполнение, дальше дожимаем выбранное.</p>
+    <div class="meta">
+      <span class="badge">Лёгкий фон, <b>красный — только акцент</b></span>
+      <span class="badge">Лист + правки + стикеры</span>
+      <span class="badge">Контент урезан · без цен · рейтинг не на hero</span>
+    </div>
+  </header>
+  <div class="grid">
+    <div class="card">
+      <div class="prev"><div class="num">Вариант A</div><iframe src="fav-a.html" scrolling="no"></iframe></div>
+      <div class="card-b">
+        <h3>A — редактура как герой</h3>
+        <p class="idea">В первом экране — диффы «было → стало» красным маркером: показываем, как слабый текст превращаем в продающий. Сильнее всех демонстрирует продукт.</p>
+        <a class="open" href="fav-a.html">Открыть вариант A →</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="prev"><div class="num">Вариант B</div><iframe src="fav-b.html" scrolling="no"></iframe></div>
+      <div class="card-b">
+        <h3>B — стикеры повсюду</h3>
+        <p class="idea">Коты-маскоты как наклейки по всем секциям, с репликами при наведении. Самый живой и тёплый вариант.</p>
+        <a class="open" href="fav-b.html">Открыть вариант B →</a>
+      </div>
+    </div>
+    <div class="card">
+      <div class="prev"><div class="num">Вариант C</div><iframe src="fav-c.html" scrolling="no"></iframe></div>
+      <div class="card-b">
+        <h3>C — интерактив, максимум воздуха</h3>
+        <p class="idea">Самый лёгкий: короткий заголовок, скотч на листе, инлайн-дифф, плавные появления. Минимум текста — максимум движения.</p>
+        <a class="open" href="fav-c.html">Открыть вариант C →</a>
+      </div>
+    </div>
+  </div>
+  <footer>
+    Гибрид собран по итогам обратной связи команды. Дальше выбираем один вариант и дожимаем экран за экраном, облегчая повествование. Лид-магнит «Продаст или нет» в демо-режиме (заглушка) — на проде подключается бэкенд.
+  </footer>
+</div>
+</body>
+</html>
